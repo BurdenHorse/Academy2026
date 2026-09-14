@@ -1,0 +1,682 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Page Snapshots renders EmployeeCompletePage unchanged 1`] = `
+<div>
+  <div
+    class="box-shadow"
+  >
+    <div
+      class="notification-box"
+    >
+      <h1
+        class="msg-title"
+      >
+        ユーザの登録が完了しました。
+      </h1>
+      <div
+        class="notification-box-btn"
+      >
+        <button
+          class="btn btn-primary btn-sm"
+          type="button"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Page Snapshots renders EmployeeConfirmPage unchanged 1`] = `<div />`;
+
+exports[`Page Snapshots renders EmployeeDetailPage unchanged 1`] = `
+<div>
+  <div
+    class="row"
+  >
+    <div
+      class="c-form box-shadow text-center p-4"
+    >
+      <div>
+        読み込み中...
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Page Snapshots renders EmployeeEditPage unchanged 1`] = `
+<div>
+  <div
+    class="row"
+  >
+    <form
+      class="c-form box-shadow"
+    >
+      <ul>
+        <li
+          class="title"
+        >
+          会員情報編集
+        </li>
+        <li
+          class="form-group row d-flex"
+        >
+          <label
+            class="col-form-label col-sm-2"
+          >
+            <i
+              class="relative"
+            >
+              アカウント名
+              :
+              <span
+                class="note-red"
+              >
+                *
+              </span>
+            </i>
+          </label>
+          <div
+            class="col-sm col-sm-10"
+          >
+            <input
+              class="form-control  "
+              tabindex="0"
+              type="text"
+              value=""
+            />
+          </div>
+        </li>
+        <li
+          class="form-group row d-flex"
+        >
+          <label
+            class="col-form-label col-sm-2"
+          >
+            <i
+              class="relative"
+            >
+              グループ
+              :
+              <span
+                class="note-red"
+              >
+                *
+              </span>
+            </i>
+          </label>
+          <div
+            class="col-sm col-sm-10"
+          >
+            <select
+              class="form-control "
+            >
+              <option
+                value=""
+              >
+                選択してください
+              </option>
+            </select>
+          </div>
+        </li>
+        <li
+          class="form-group row d-flex"
+        >
+          <label
+            class="col-form-label col-sm-2"
+          >
+            <i
+              class="relative"
+            >
+              氏名
+              :
+              <span
+                class="note-red"
+              >
+                *
+              </span>
+            </i>
+          </label>
+          <div
+            class="col-sm col-sm-10"
+          >
+            <input
+              class="form-control "
+              type="text"
+              value=""
+            />
+          </div>
+        </li>
+        <li
+          class="form-group row d-flex"
+        >
+          <label
+            class="col-form-label col-sm-2"
+          >
+            <i
+              class="relative"
+            >
+              カタカナ氏名
+              :
+              <span
+                class="note-red"
+              >
+                *
+              </span>
+            </i>
+          </label>
+          <div
+            class="col-sm col-sm-10"
+          >
+            <input
+              class="form-control "
+              type="text"
+              value=""
+            />
+          </div>
+        </li>
+        <li
+          class="form-group row d-flex"
+        >
+          <label
+            class="col-form-label col-sm-2"
+          >
+            <i
+              class="relative"
+            >
+              生年月日
+              :
+              <span
+                class="note-red"
+              >
+                *
+              </span>
+            </i>
+          </label>
+          <div
+            class="col-sm col-sm-10"
+          >
+            <div
+              class="datepicker-wrapper"
+            >
+              <div
+                class="react-datepicker-wrapper"
+              >
+                <div
+                  class="react-datepicker__input-container"
+                >
+                  <input
+                    autocomplete="off"
+                    class="form-control "
+                    placeholder="yyyy/MM/dd"
+                    type="text"
+                    value=""
+                  />
+                </div>
+              </div>
+              <span
+                class="glyphicon glyphicon-calendar"
+              />
+            </div>
+          </div>
+        </li>
+        <li
+          class="form-group row d-flex"
+        >
+          <label
+            class="col-form-label col-sm-2"
+          >
+            <i
+              class="relative"
+            >
+              メールアドレス
+              :
+              <span
+                class="note-red"
+              >
+                *
+              </span>
+            </i>
+          </label>
+          <div
+            class="col-sm col-sm-10"
+          >
+            <input
+              class="form-control "
+              type="email"
+              value=""
+            />
+          </div>
+        </li>
+        <li
+          class="form-group row d-flex"
+        >
+          <label
+            class="col-form-label col-sm-2"
+          >
+            <i
+              class="relative"
+            >
+              電話番号
+              :
+              <span
+                class="note-red"
+              >
+                *
+              </span>
+            </i>
+          </label>
+          <div
+            class="col-sm col-sm-10"
+          >
+            <input
+              class="form-control "
+              type="text"
+              value=""
+            />
+          </div>
+        </li>
+        <li
+          class="form-group row d-flex"
+        >
+          <label
+            class="col-form-label col-sm-2"
+          >
+            <i
+              class="relative"
+            >
+              パスワード
+              :
+              <span
+                class="note-red"
+              >
+                *
+              </span>
+            </i>
+          </label>
+          <div
+            class="col-sm col-sm-10"
+          >
+            <input
+              class="form-control "
+              type="password"
+              value=""
+            />
+          </div>
+        </li>
+        <li
+          class="form-group row d-flex"
+        >
+          <label
+            class="col-form-label col-sm-2"
+          >
+            <i
+              class="relative"
+            >
+              パスワード（確認）
+              :
+              <span
+                class="note-red"
+              >
+                *
+              </span>
+            </i>
+          </label>
+          <div
+            class="col-sm col-sm-10"
+          >
+            <input
+              class="form-control "
+              type="password"
+              value=""
+            />
+          </div>
+        </li>
+        <li
+          class="title mt-12"
+        >
+          <a
+            href="#!"
+          >
+            日本語能力
+          </a>
+        </li>
+        <li
+          class="form-group row d-flex"
+        >
+          <label
+            class="col-form-label col-sm-2"
+          >
+            <i
+              class="relative"
+            >
+              資格
+              :
+            </i>
+          </label>
+          <div
+            class="col-sm col-sm-10"
+          >
+            <select
+              class="form-control"
+            >
+              <option
+                value=""
+              >
+                選択してください
+              </option>
+            </select>
+          </div>
+        </li>
+        <li
+          class="form-group row d-flex"
+        >
+          <label
+            class="col-form-label col-sm-2"
+          >
+            <i
+              class="relative"
+            >
+              資格交付日
+              :
+            </i>
+          </label>
+          <div
+            class="col-sm col-sm-10"
+          >
+            <div
+              class="datepicker-wrapper"
+            >
+              <div
+                class="react-datepicker-wrapper"
+              >
+                <div
+                  class="react-datepicker__input-container"
+                >
+                  <input
+                    autocomplete="off"
+                    class="form-control "
+                    disabled=""
+                    placeholder="yyyy/MM/dd"
+                    type="text"
+                    value=""
+                  />
+                </div>
+              </div>
+              <span
+                class="glyphicon glyphicon-calendar"
+                style="cursor: not-allowed;"
+              />
+            </div>
+          </div>
+        </li>
+        <li
+          class="form-group row d-flex"
+        >
+          <label
+            class="col-form-label col-sm-2"
+          >
+            <i
+              class="relative"
+            >
+              失効日
+              :
+            </i>
+          </label>
+          <div
+            class="col-sm col-sm-10"
+          >
+            <div
+              class="datepicker-wrapper"
+            >
+              <div
+                class="react-datepicker-wrapper"
+              >
+                <div
+                  class="react-datepicker__input-container"
+                >
+                  <input
+                    autocomplete="off"
+                    class="form-control "
+                    disabled=""
+                    placeholder="yyyy/MM/dd"
+                    type="text"
+                    value=""
+                  />
+                </div>
+              </div>
+              <span
+                class="glyphicon glyphicon-calendar"
+                style="cursor: not-allowed;"
+              />
+            </div>
+          </div>
+        </li>
+        <li
+          class="form-group row d-flex"
+        >
+          <label
+            class="col-form-label col-sm-2"
+          >
+            <i
+              class="relative"
+            >
+              点数
+              :
+            </i>
+          </label>
+          <div
+            class="col-sm col-sm-10"
+          >
+            <input
+              class="form-control "
+              disabled=""
+              type="text"
+              value=""
+            />
+          </div>
+        </li>
+        <li
+          class="form-group row d-flex"
+        >
+          <div
+            class="btn-group col-sm col-sm-10 ml"
+          >
+            <button
+              class="btn btn-primary btn-sm"
+              type="submit"
+            >
+              確認
+            </button>
+            <button
+              class="btn btn-secondary btn-sm"
+              type="button"
+            >
+              戻る
+            </button>
+          </div>
+        </li>
+      </ul>
+    </form>
+  </div>
+</div>
+`;
+
+exports[`Page Snapshots renders EmployeeListPage unchanged 1`] = `
+<div>
+  <div
+    class="search-memb"
+  >
+    <h1
+      class="title"
+    >
+      会員名称で会員を検索します。検索条件無しの場合は全て表示されます。
+    </h1>
+    <form
+      class="c-form"
+    >
+      <ul
+        class="d-flex align-items-center"
+      >
+        <li
+          class="form-group row mb-0 mr-3"
+        >
+          <label
+            class="col-form-label"
+          >
+            氏名
+            :
+          </label>
+          <div
+            class="col-sm"
+          >
+            <input
+              class="form-control"
+              maxlength="125"
+              type="text"
+              value=""
+            />
+          </div>
+        </li>
+        <li
+          class="form-group row mb-0 mr-3"
+        >
+          <label
+            class="col-form-label"
+          >
+            グループ
+            :
+          </label>
+          <div
+            class="col-sm"
+          >
+            <select
+              class="form-control"
+            >
+              <option
+                value=""
+              >
+                全て
+              </option>
+            </select>
+          </div>
+        </li>
+        <li
+          class="form-group row mb-0"
+        >
+          <div
+            class="btn-group"
+          >
+            <button
+              class="btn btn-primary btn-sm mr-2"
+              type="submit"
+            >
+              検索
+            </button>
+            <button
+              class="btn btn-secondary btn-sm"
+              type="button"
+            >
+              新規追加
+            </button>
+          </div>
+        </li>
+      </ul>
+    </form>
+  </div>
+  <div
+    class="row row-table mt-4"
+  />
+</div>
+`;
+
+exports[`Page Snapshots renders HomePage unchanged and checks for redirection logic 1`] = `<div />`;
+
+exports[`Page Snapshots renders RootLayout unchanged 1`] = `
+<DocumentFragment>
+  <main>
+    <div
+      class="container"
+    >
+      <nav
+        class="nav-bar"
+      >
+        <div
+          class="content-main"
+        >
+          <div
+            class="d-flex"
+          >
+            <a
+              class="navbar-brand"
+            >
+              <img
+                alt="logo"
+                data-nimg="1"
+                decoding="async"
+                height="50"
+                loading="lazy"
+                src="/assets/images/Logo-Luvina.svg"
+                style="color: transparent;"
+                title="Logo"
+                width="100"
+              />
+            </a>
+            <h5
+              class="title-brand mr-auto"
+            >
+              Luvina Software
+            </h5>
+            <ul
+              class="navbar-nav flex-row d-flex"
+            >
+              <li
+                class="nav-item"
+              >
+                <a
+                  href="/logout"
+                >
+                  ログアウト
+                </a>
+              </li>
+              <li
+                class="nav-item"
+              >
+                <a
+                  href="/employees/adm002"
+                >
+                  トップ
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      <div
+        class="content"
+      >
+        <div
+          class="content-main"
+        >
+          <div>
+            Test Child
+          </div>
+        </div>
+      </div>
+      <footer
+        class="footer"
+      >
+        <div
+          class="content-main"
+        >
+          <p>
+            Copyright © 2010 ルビナソフトウエア株式会社. All rights reserved.
+          </p>
+        </div>
+      </footer>
+    </div>
+  </main>
+</DocumentFragment>
+`;

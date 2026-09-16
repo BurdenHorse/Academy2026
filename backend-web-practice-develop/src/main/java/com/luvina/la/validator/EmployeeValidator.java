@@ -9,11 +9,13 @@ import com.luvina.la.config.Constants;
 import com.luvina.la.entity.EmployeeEntity;
 import com.luvina.la.exception.AppException;
 import com.luvina.la.payload.request.AddEmployeeRequest;
-import com.luvina.la.payload.request.EmployeeCertificationRequestDTO;
+import com.luvina.la.payload.request.EmployeeCertificationRequest;
 import com.luvina.la.payload.request.UpdateEmployeeRequest;
 import com.luvina.la.repository.CertificationRepository;
 import com.luvina.la.repository.DepartmentRepository;
 import com.luvina.la.repository.EmployeeRepository;
+import com.luvina.la.util.DateTimeUtil;
+import com.luvina.la.util.StringUtil;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -35,7 +37,8 @@ public class EmployeeValidator {
     private static final List<String> VALID_SORT_VALUES = Arrays.asList(Constants.SORT_ASC, Constants.SORT_DESC);
     private static final Pattern LOGIN_ID_PATTERN = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]*$");
     private static final Pattern KANA_PATTERN = Pattern.compile("^[\\uFF66-\\uFF9F\\s]+$");
-    private static final Pattern HALFSIZE_PATTERN = Pattern.compile("^[0-9+() -]+$");
+    private static final Pattern ALL_HALFSIZE_PATTERN = Pattern.compile("^[\\x20-\\x7E\\uFF61-\\uFF9F]+$");
+    private static final Pattern HALFSIZE_PATTERN = Pattern.compile("^[a-zA-Z0-9+() -]+$");
     private static final Pattern DATE_FORMAT_PATTERN = Pattern.compile("^\\d{4}/\\d{2}/\\d{2}$");
 
     @Autowired
@@ -97,14 +100,7 @@ public class EmployeeValidator {
      * @return Long đã parse hoặc null nếu không hợp lệ
      */
     public Long parseDepartmentId(String departmentId) {
-        if (departmentId == null || departmentId.trim().isEmpty()) {
-            return null;
-        }
-        try {
-            return Long.parseLong(departmentId.trim());
-        } catch (NumberFormatException e) {
-            return null;
-        }
+        return StringUtil.toLongOrNull(departmentId);
     }
 
     /**
@@ -219,18 +215,32 @@ public class EmployeeValidator {
     }
 
     /**
+     * Helper kiểm tra chuỗi bắt buộc nhập (ER001) và không vượt quá độ dài tối đa (ER006).
+     *
+     * @param value     Giá trị chuỗi cần kiểm tra
+     * @param maxLength Độ dài tối đa cho phép
+     * @param paramName Tên trường bằng tiếng Nhật (dùng cho message lỗi)
+     * @return Chuỗi đã được trim
+     */
+    private String validateRequiredAndMaxLength(String value, int maxLength, String paramName) {
+        if (StringUtil.isNullOrEmpty(value)) {
+            throw new AppException(Constants.ERROR_CODE_REQUIRED, Collections.singletonList(paramName));
+        }
+        String trimmed = value.trim();
+        if (trimmed.length() > maxLength) {
+            throw new AppException(Constants.ERROR_CODE_MAX_LENGTH, Collections.singletonList(paramName));
+        }
+        return trimmed;
+    }
+
+    /**
      * Validate email cho trường hợp update: bắt buộc nhập, max 125 ký tự.
+     * Tái sử dụng validateEmployeeEmail theo chuẩn DRY.
      *
      * @param email Email nhân viên
      */
     public void validateEmployeeEmailForUpdate(String email) {
-        if (email == null || email.trim().isEmpty()) {
-            throw new AppException(Constants.ERROR_CODE_REQUIRED, Collections.singletonList(Constants.PARAM_NAME_EMAIL));
-        }
-        String trimmedEmail = email.trim();
-        if (trimmedEmail.length() > 125) {
-            throw new AppException(Constants.ERROR_CODE_MAX_LENGTH, Collections.singletonList(Constants.PARAM_NAME_EMAIL));
-        }
+        validateEmployeeEmail(email);
     }
 
     /**
@@ -251,13 +261,7 @@ public class EmployeeValidator {
      * Validate 1.1: [employeeLoginId]
      */
     public void validateEmployeeLoginId(String loginId) {
-        if (loginId == null || loginId.trim().isEmpty()) {
-            throw new AppException(Constants.ERROR_CODE_REQUIRED, Collections.singletonList(Constants.PARAM_NAME_ACCOUNT));
-        }
-        String trimmedLoginId = loginId.trim();
-        if (trimmedLoginId.length() > 50) {
-            throw new AppException(Constants.ERROR_CODE_MAX_LENGTH, Collections.singletonList(Constants.PARAM_NAME_ACCOUNT));
-        }
+        String trimmedLoginId = validateRequiredAndMaxLength(loginId, 50, Constants.PARAM_NAME_ACCOUNT);
         if (!LOGIN_ID_PATTERN.matcher(trimmedLoginId).matches() || Character.isDigit(trimmedLoginId.charAt(0))) {
             throw new AppException(Constants.ERROR_CODE_LOGIN_ID_FORMAT, Collections.singletonList(Constants.PARAM_NAME_ACCOUNT));
         }
@@ -270,24 +274,16 @@ public class EmployeeValidator {
      * Validate 1.2: [employeeName]
      */
     public void validateEmployeeName(String name) {
-        if (name == null || name.trim().isEmpty()) {
-            throw new AppException(Constants.ERROR_CODE_REQUIRED, Collections.singletonList(Constants.PARAM_NAME_EMPLOYEE_NAME));
-        }
-        if (name.trim().length() > 125) {
-            throw new AppException(Constants.ERROR_CODE_MAX_LENGTH, Collections.singletonList(Constants.PARAM_NAME_EMPLOYEE_NAME));
-        }
+        validateRequiredAndMaxLength(name, 125, Constants.PARAM_NAME_EMPLOYEE_NAME);
     }
 
     /**
      * Validate 1.3: [employeeNameKana] (chỉ nhận halfsize Katakana)
      */
     public void validateEmployeeNameKana(String nameKana) {
-        if (nameKana == null || nameKana.trim().isEmpty()) {
-            throw new AppException(Constants.ERROR_CODE_REQUIRED, Collections.singletonList(Constants.PARAM_NAME_FULL_NAME_KANA));
-        }
-        String trimmedNameKana = nameKana.trim();
-        if (trimmedNameKana.length() > 125) {
-            throw new AppException(Constants.ERROR_CODE_MAX_LENGTH, Collections.singletonList(Constants.PARAM_NAME_FULL_NAME_KANA));
+        String trimmedNameKana = validateRequiredAndMaxLength(nameKana, 125, Constants.PARAM_NAME_FULL_NAME_KANA);
+        if (!ALL_HALFSIZE_PATTERN.matcher(trimmedNameKana).matches()) {
+            throw new AppException(Constants.ERROR_CODE_HALFSIZE, Collections.singletonList(Constants.PARAM_NAME_FULL_NAME_KANA));
         }
         if (!KANA_PATTERN.matcher(trimmedNameKana).matches()) {
             throw new AppException(Constants.ERROR_CODE_KANA, Collections.singletonList(Constants.PARAM_NAME_FULL_NAME_KANA));
@@ -308,26 +304,14 @@ public class EmployeeValidator {
      * Validate 1.5: [employeeEmail]
      */
     public void validateEmployeeEmail(String email) {
-        if (email == null || email.trim().isEmpty()) {
-            throw new AppException(Constants.ERROR_CODE_REQUIRED, Collections.singletonList(Constants.PARAM_NAME_EMAIL));
-        }
-        String trimmedEmail = email.trim();
-        if (trimmedEmail.length() > 125) {
-            throw new AppException(Constants.ERROR_CODE_MAX_LENGTH, Collections.singletonList(Constants.PARAM_NAME_EMAIL));
-        }
+        validateRequiredAndMaxLength(email, 125, Constants.PARAM_NAME_EMAIL);
     }
 
     /**
      * Validate 1.6: [employeeTelephone]
      */
     public void validateEmployeeTelephone(String telephone) {
-        if (telephone == null || telephone.trim().isEmpty()) {
-            throw new AppException(Constants.ERROR_CODE_REQUIRED, Collections.singletonList(Constants.PARAM_NAME_TELEPHONE));
-        }
-        String trimmedTelephone = telephone.trim();
-        if (trimmedTelephone.length() > 50) {
-            throw new AppException(Constants.ERROR_CODE_MAX_LENGTH, Collections.singletonList(Constants.PARAM_NAME_TELEPHONE));
-        }
+        String trimmedTelephone = validateRequiredAndMaxLength(telephone, 50, Constants.PARAM_NAME_TELEPHONE);
         if (!HALFSIZE_PATTERN.matcher(trimmedTelephone).matches()) {
             throw new AppException(Constants.ERROR_CODE_HALFSIZE, Collections.singletonList(Constants.PARAM_NAME_TELEPHONE));
         }
@@ -340,10 +324,7 @@ public class EmployeeValidator {
         if (password == null || password.trim().isEmpty()) {
             throw new AppException(Constants.ERROR_CODE_REQUIRED, Collections.singletonList(Constants.PARAM_NAME_PASSWORD));
         }
-        String trimmedPassword = password.trim();
-        if (trimmedPassword.length() < 8 || trimmedPassword.length() > 50) {
-            throw new AppException(Constants.ERROR_CODE_LENGTH_RANGE, Arrays.asList(Constants.PARAM_NAME_PASSWORD, "8", "50"));
-        }
+        validateEmployeeLoginPasswordForUpdate(password);
     }
 
     /**
@@ -364,14 +345,14 @@ public class EmployeeValidator {
     /**
      * Validate 1.9: [certifications]
      */
-    public void validateCertifications(List<EmployeeCertificationRequestDTO> certs) {
+    public void validateCertifications(List<EmployeeCertificationRequest> certs) {
         if (certs == null || certs.isEmpty()) {
             return;
         }
 
-        for (EmployeeCertificationRequestDTO certDTO : certs) {
+        for (EmployeeCertificationRequest cert : certs) {
             // certificationId
-            Long certificationId = certDTO.getCertificationId();
+            Long certificationId = cert.getCertificationId();
             if (certificationId == null) {
                 throw new AppException(Constants.ERROR_CODE_REQUIRED, Collections.singletonList(Constants.PARAM_NAME_CERTIFICATION));
             }
@@ -383,14 +364,14 @@ public class EmployeeValidator {
             }
 
             // startDate
-            String startDateStr = certDTO.getCertificationStartDate();
+            String startDateStr = cert.getCertificationStartDate();
             if (startDateStr == null || startDateStr.trim().isEmpty()) {
                 throw new AppException(Constants.ERROR_CODE_REQUIRED, Collections.singletonList(Constants.PARAM_NAME_CERT_START_DATE));
             }
             Date startDate = parseDate(startDateStr.trim(), Constants.PARAM_NAME_CERT_START_DATE);
 
             // endDate
-            String endDateStr = certDTO.getCertificationEndDate();
+            String endDateStr = cert.getCertificationEndDate();
             if (endDateStr == null || endDateStr.trim().isEmpty()) {
                 throw new AppException(Constants.ERROR_CODE_REQUIRED, Collections.singletonList(Constants.PARAM_NAME_CERT_END_DATE));
             }
@@ -402,7 +383,7 @@ public class EmployeeValidator {
             }
 
             // score
-            BigDecimal score = certDTO.getEmployeeCertificationScore();
+            BigDecimal score = cert.getEmployeeCertificationScore();
             if (score == null) {
                 throw new AppException(Constants.ERROR_CODE_REQUIRED, Collections.singletonList(Constants.PARAM_NAME_SCORE));
             }
@@ -414,26 +395,14 @@ public class EmployeeValidator {
 
     /**
      * Parse chuỗi ngày tháng dạng yyyy/MM/dd.
-     * Phân biệt rõ:
-     * - Sai định dạng yyyy/MM/dd -> ném mã ER005
-     * - Đúng định dạng nhưng ngày không hợp lệ trên lịch (vd: 2023/02/30) -> ném mã ER011
+     * Ủy quyền sang DateTimeUtil để dùng chung.
      *
      * @param dateStr   Chuỗi ngày tháng
      * @param fieldName Tên trường tiếng Nhật để ném mã lỗi
      * @return Date hợp lệ
      */
     public Date parseDate(String dateStr, String fieldName) {
-        if (!DATE_FORMAT_PATTERN.matcher(dateStr).matches()) {
-            throw new AppException(Constants.ERROR_CODE_FORMAT_INVALID, Arrays.asList(fieldName, "yyyy/MM/dd"));
-        }
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-        sdf.setLenient(false);
-        try {
-            return sdf.parse(dateStr);
-        } catch (ParseException e) {
-            throw new AppException(Constants.ERROR_CODE_DATE_INVALID, Collections.singletonList(fieldName));
-        }
+        return DateTimeUtil.parseDate(dateStr, fieldName);
     }
 }
 

@@ -22,15 +22,13 @@ import com.luvina.la.entity.DepartmentEntity;
 import com.luvina.la.entity.EmployeeCertificationEntity;
 import com.luvina.la.entity.EmployeeEntity;
 import com.luvina.la.payload.request.AddEmployeeRequest;
-import com.luvina.la.payload.request.EmployeeCertificationRequestDTO;
+import com.luvina.la.payload.request.EmployeeCertificationRequest;
 import com.luvina.la.payload.request.UpdateEmployeeRequest;
 import com.luvina.la.repository.CertificationRepository;
 import com.luvina.la.repository.DepartmentRepository;
 import com.luvina.la.repository.EmployeeCertificationRepository;
 import com.luvina.la.repository.EmployeeRepository;
 import com.luvina.la.service.impl.EmployeeServiceImpl;
-import static org.mockito.Mockito.mock;
-import com.luvina.la.validator.EmployeeValidator;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
@@ -65,9 +63,6 @@ class EmployeeServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private EmployeeValidator employeeValidator;
-
     @InjectMocks
     private EmployeeServiceImpl employeeService;
 
@@ -101,7 +96,6 @@ class EmployeeServiceTest {
     @DisplayName("addEmployee lưu thành công nhân viên không có chứng chỉ")
     void testAddEmployee_SuccessWithoutCertifications() {
         when(departmentRepository.findById(1L)).thenReturn(Optional.of(department));
-        when(employeeValidator.parseDate("1998/12/20", "生年月日")).thenReturn(new Date());
         when(passwordEncoder.encode("secretPass123")).thenReturn("encodedPassword");
         when(employeeRepository.save(any(EmployeeEntity.class))).thenReturn(savedEmployee);
 
@@ -117,7 +111,7 @@ class EmployeeServiceTest {
     @Test
     @DisplayName("addEmployee lưu thành công nhân viên có chứng chỉ tiếng Nhật")
     void testAddEmployee_SuccessWithCertifications() {
-        EmployeeCertificationRequestDTO certDTO = new EmployeeCertificationRequestDTO();
+        EmployeeCertificationRequest certDTO = new EmployeeCertificationRequest();
         certDTO.setCertificationId(3L);
         certDTO.setCertificationStartDate("2022/05/10");
         certDTO.setCertificationEndDate("2024/05/10");
@@ -129,13 +123,10 @@ class EmployeeServiceTest {
         certification.setCertificationName("N3");
 
         when(departmentRepository.findById(1L)).thenReturn(Optional.of(department));
-        when(employeeValidator.parseDate("1998/12/20", "生年月日")).thenReturn(new Date());
         when(passwordEncoder.encode("secretPass123")).thenReturn("encodedPassword");
         when(employeeRepository.save(any(EmployeeEntity.class))).thenReturn(savedEmployee);
 
         when(certificationRepository.findById(3L)).thenReturn(Optional.of(certification));
-        when(employeeValidator.parseDate("2022/05/10", "資格交付日")).thenReturn(new Date());
-        when(employeeValidator.parseDate("2024/05/10", "失効日")).thenReturn(new Date());
 
         AddEmployeeDTO response = employeeService.addEmployee(request);
 
@@ -198,15 +189,13 @@ class EmployeeServiceTest {
     @Test
     @DisplayName("deleteEmployee xóa thành công khi nhân viên tồn tại")
     void testDeleteEmployee_Success() {
-        when(employeeRepository.findByEmployeeId(100L)).thenReturn(Optional.of(savedEmployee));
-
         DeleteEmployeeDTO response = employeeService.deleteEmployee(100L);
 
         assertNotNull(response);
         assertEquals(100L, response.getEmployeeId());
 
         verify(employeeCertificationRepository, times(1)).deleteByEmployee_EmployeeId(100L);
-        verify(employeeRepository, times(1)).delete(savedEmployee);
+        verify(employeeRepository, times(1)).deleteById(100L);
     }
 
     @Test
@@ -225,7 +214,6 @@ class EmployeeServiceTest {
 
         when(employeeRepository.findByEmployeeId(100L)).thenReturn(Optional.of(savedEmployee));
         when(departmentRepository.findById(1L)).thenReturn(Optional.of(department));
-        when(employeeValidator.parseDate(any(), any())).thenReturn(new Date());
         when(passwordEncoder.encode("newSecretPass456")).thenReturn("hashed_new_pass");
         when(employeeRepository.save(any(EmployeeEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -257,7 +245,7 @@ class EmployeeServiceTest {
         updateReq.setEmployeeTelephone("0987654321");
         updateReq.setDepartmentId(1L);
 
-        EmployeeCertificationRequestDTO newCertReq = new EmployeeCertificationRequestDTO();
+        EmployeeCertificationRequest newCertReq = new EmployeeCertificationRequest();
         newCertReq.setCertificationId(1L);
         newCertReq.setCertificationStartDate("2024/01/01");
         newCertReq.setCertificationEndDate("2025/01/01");
@@ -270,7 +258,6 @@ class EmployeeServiceTest {
         when(employeeRepository.findByEmployeeId(100L)).thenReturn(Optional.of(savedEmployee));
         when(departmentRepository.findById(1L)).thenReturn(Optional.of(department));
         when(certificationRepository.findById(1L)).thenReturn(Optional.of(certEntity));
-        when(employeeValidator.parseDate(any(), any())).thenReturn(new Date());
         when(employeeRepository.save(any(EmployeeEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         UpdateEmployeeDTO response = employeeService.updateEmployee(updateReq);

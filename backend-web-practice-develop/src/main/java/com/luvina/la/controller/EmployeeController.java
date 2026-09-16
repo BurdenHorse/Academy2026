@@ -20,6 +20,7 @@ import com.luvina.la.payload.response.EmployeeDetailResponse;
 import com.luvina.la.payload.response.ListEmployeeResponse;
 import com.luvina.la.payload.response.UpdateEmployeeResponse;
 import com.luvina.la.service.EmployeeService;
+import com.luvina.la.util.StringUtil;
 import com.luvina.la.validator.EmployeeValidator;
 import org.springframework.web.bind.annotation.*;
 
@@ -97,20 +98,19 @@ public class EmployeeController {
         int parsedLimit = employeeValidator.parsePositiveIntParam(limit, Constants.DEFAULT_LIMIT, Constants.PARAM_NAME_LIMIT);
 
         // Parse departmentId sang Long, bỏ qua nếu không hợp lệ
-        Long parsedDepartmentId = employeeValidator.parseDepartmentId(departmentId);
+        Long parsedDepartmentId = StringUtil.toLongOrNull(departmentId);
 
         // Xử lý employeeName: trim và kiểm tra rỗng
-        String trimmedName = (employeeName != null && !employeeName.trim().isEmpty())
-                ? employeeName.trim() : null;
+        String trimmedName = StringUtil.trimToNull(employeeName);
 
         // Validate độ dài tối đa 125 ký tự theo đặc tả ADM002 (mã lỗi ER006)
         employeeValidator.validateSearchEmployeeName(trimmedName);
 
         EmployeeSearchResultDTO resultDTO = employeeService.getEmployeeList(
                 trimmedName, parsedDepartmentId,
-                normalizeSort(ordEmployeeName),
-                normalizeSort(ordCertificationName),
-                normalizeSort(ordEndDate),
+                StringUtil.normalizeSort(ordEmployeeName),
+                StringUtil.normalizeSort(ordCertificationName),
+                StringUtil.normalizeSort(ordEndDate),
                 sortPriority,
                 parsedOffset, parsedLimit);
 
@@ -177,20 +177,6 @@ public class EmployeeController {
         EmployeeEntity employeeEntity = employeeValidator.validateDeleteRequest(id);
         DeleteEmployeeDTO deleteEmployeeDTO = employeeService.deleteEmployee(employeeEntity.getEmployeeId());
         return DeleteEmployeeResponse.success(deleteEmployeeDTO.getEmployeeId());
-    }
-
-    /**
-     * Chuẩn hóa giá trị sort: trim, uppercase.
-     * Trả về null nếu giá trị rỗng (không sort theo cột này).
-     *
-     * @param sortValue Giá trị sort cần chuẩn hóa
-     * @return Giá trị đã chuẩn hóa (ASC/DESC) hoặc null
-     */
-    private String normalizeSort(String sortValue) {
-        if (sortValue == null || sortValue.trim().isEmpty()) {
-            return null;
-        }
-        return sortValue.trim().toUpperCase();
     }
 }
 

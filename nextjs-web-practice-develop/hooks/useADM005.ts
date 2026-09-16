@@ -119,8 +119,14 @@ export function useADM005() {
           }
           router.push(ROUTES.EMPLOYEES.COMPLETE);
         } else {
-          if (updateEmployeeResponse.code === ERROR_CODES.ER013) {
-            const errMsg = formatErrorMessage(updateEmployeeResponse.code, []);
+          if (
+            updateEmployeeResponse.code === ERROR_CODES.ER013 ||
+            updateEmployeeResponse.code === ERROR_CODES.ER014 ||
+            updateEmployeeResponse.code === ERROR_CODES.ER015 ||
+            updateEmployeeResponse.code === ERROR_CODES.ER023 ||
+            updateEmployeeResponse.code === RESPONSE_CODES.SERVER_ERROR
+          ) {
+            const errMsg = formatErrorMessage(updateEmployeeResponse.code, []) || MESSAGES.ERRORS.SYSTEM_ERROR;
             if (typeof window !== 'undefined') {
               sessionStorage.removeItem(STORAGE_KEYS.FORM_DATA);
               sessionStorage.removeItem(STORAGE_KEYS.SERVER_ERROR);
@@ -157,6 +163,20 @@ export function useADM005() {
           }
           router.push(ROUTES.EMPLOYEES.COMPLETE);
         } else {
+          if (
+            addEmployeeResponse.code === ERROR_CODES.ER015 ||
+            addEmployeeResponse.code === ERROR_CODES.ER023 ||
+            addEmployeeResponse.code === RESPONSE_CODES.SERVER_ERROR
+          ) {
+            const errMsg = formatErrorMessage(addEmployeeResponse.code, []) || MESSAGES.ERRORS.SYSTEM_ERROR;
+            if (typeof window !== 'undefined') {
+              sessionStorage.removeItem(STORAGE_KEYS.FORM_DATA);
+              sessionStorage.removeItem(STORAGE_KEYS.SERVER_ERROR);
+              sessionStorage.setItem(STORAGE_KEYS.SYSTEM_ERROR_MESSAGE, errMsg);
+            }
+            router.replace(ROUTES.SYSTEM_ERROR);
+            return;
+          }
           const errorMsg = formatErrorMessage(addEmployeeResponse.code, []);
           if (typeof window !== 'undefined') {
             sessionStorage.setItem(STORAGE_KEYS.SERVER_ERROR, errorMsg);
@@ -201,12 +221,29 @@ export function useADM005() {
         }
       }
 
-      if (errorCode === ERROR_CODES.ER013) {
+      if (errorCode === ERROR_CODES.ER013 || errorCode === ERROR_CODES.ER014) {
         const errorMsg = formatErrorMessage(errorCode, errorParams) || MESSAGES.ERRORS.ER013();
         if (typeof window !== 'undefined') {
           sessionStorage.removeItem(STORAGE_KEYS.FORM_DATA);
           sessionStorage.removeItem(STORAGE_KEYS.SERVER_ERROR);
           sessionStorage.setItem(STORAGE_KEYS.SYSTEM_ERROR_MESSAGE, errorMsg);
+        }
+        router.replace(ROUTES.SYSTEM_ERROR);
+        return;
+      }
+
+      const isSystemError =
+        !errorCode ||
+        errorCode === ERROR_CODES.ER015 ||
+        errorCode === ERROR_CODES.ER023 ||
+        errorCode === RESPONSE_CODES.SERVER_ERROR ||
+        formatErrorMessage(errorCode, errorParams) === MESSAGES.ERRORS.SYSTEM_ERROR;
+
+      if (isSystemError) {
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem(STORAGE_KEYS.FORM_DATA);
+          sessionStorage.removeItem(STORAGE_KEYS.SERVER_ERROR);
+          sessionStorage.setItem(STORAGE_KEYS.SYSTEM_ERROR_MESSAGE, MESSAGES.ERRORS.SYSTEM_ERROR);
         }
         router.replace(ROUTES.SYSTEM_ERROR);
         return;

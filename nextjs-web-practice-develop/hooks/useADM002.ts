@@ -2,23 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { employeeApi } from '@/lib/api/employee';
 import { EmployeeListDTO, EmployeeSearchParams } from '@/types/employee';
 import { DEFAULT_PAGE_LIMIT, MESSAGES, RESPONSE_CODES } from '@/constants';
+import { truncateText, formatScore } from '@/utils';
 import { useDepartments } from './useDepartments';
+
+export { truncateText, formatScore };
 
 const STORAGE_KEY_PARAMS = 'ADM002_SEARCH_PARAMS';
 const STORAGE_KEY_INPUT = 'ADM002_SEARCH_INPUT';
-
-/**
- * Truncate chuỗi ký tự tối đa 22 ký tự theo yêu cầu.
- *
- * @param text Chuỗi đầu vào
- * @param maxLength Độ dài tối đa (mặc định 22)
- * @returns Chuỗi sau khi cắt ngắn
- */
-export function truncateText(text: string | null | undefined, maxLength: number = 22): string {
-  if (!text) return '';
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength) + '...';
-}
 
 /**
  * Custom hook quản lý toàn bộ state và logic nghiệp vụ của màn hình danh sách nhân viên (ADM002).
@@ -213,5 +203,6 @@ export function useADM002() {
     totalPages,
     currentPage,
     truncateText,
+    formatScore,
   };
 }

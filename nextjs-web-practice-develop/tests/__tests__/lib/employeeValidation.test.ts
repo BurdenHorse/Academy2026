@@ -99,6 +99,16 @@ describe('Employee Zod Validation', () => {
     expect(validErr).toBe('');
   });
 
+  it('validates telephone field accepts halfsize alphabet (0901234abc) and returns ER008 for full-width', () => {
+    // Valid telephone with halfsize alphabet (a-z)
+    const validErr = validateEmployeeField('employeeTelephone', '0901234abc', validData);
+    expect(validErr).toBe('');
+
+    // Full-width (Zenkaku) telephone
+    const fullWidthErr = validateEmployeeField('employeeTelephone', '０９０１２３４ａｂｃ', validData);
+    expect(fullWidthErr).toBe(MESSAGES.ERRORS.ER008(LABELS.FIELDS.TELEPHONE));
+  });
+
   it('validates certification fields when certification is selected', () => {
     const dataWithCert: EmployeeFormData = {
       ...validData,
@@ -111,10 +121,16 @@ describe('Employee Zod Validation', () => {
     expect(errors.certificationEndDate).toBe(MESSAGES.ERRORS.ER012());
   });
 
-  it('validates kana name returns ER009 for full-width Katakana and accepts half-width', () => {
+  it('validates kana name returns ER008 for full-width characters, ER009 for non-katakana, and accepts half-width katakana', () => {
+    // Full-width (Zenkaku) Katakana -> returns ER008
     const fullWidthErr = validateEmployeeField('employeeNameKana', 'グエン ヴァン エー', validData);
-    expect(fullWidthErr).toBe(MESSAGES.ERRORS.ER009(LABELS.FIELDS.FULL_NAME_KANA));
+    expect(fullWidthErr).toBe(MESSAGES.ERRORS.ER008(LABELS.FIELDS.FULL_NAME_KANA));
 
+    // Half-width non-katakana (English letters) -> returns ER009
+    const nonKanaErr = validateEmployeeField('employeeNameKana', 'Nguyen Van A', validData);
+    expect(nonKanaErr).toBe(MESSAGES.ERRORS.ER009(LABELS.FIELDS.FULL_NAME_KANA));
+
+    // Half-width Katakana -> valid
     const halfWidthErr = validateEmployeeField('employeeNameKana', 'ｸﾞｴﾝ ｳﾞｧﾝ ｴｰ', validData);
     expect(halfWidthErr).toBe('');
   });

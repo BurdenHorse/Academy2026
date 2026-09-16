@@ -1,17 +1,26 @@
 import { z } from 'zod';
 import { EmployeeFormData } from '@/types/employee';
-import { isValidCalendarDate } from '@/utils/date';
+import {
+  isValidCalendarDate,
+  REGEX_LOGIN_ID,
+  REGEX_KANA,
+  REGEX_EMAIL,
+  REGEX_HALFSIZE_ASCII,
+  REGEX_ALL_HALFSIZE,
+  REGEX_HALFSIZE_TEL,
+  REGEX_HALFSIZE_NUM,
+} from '@/utils';
 import { LABELS, MESSAGES } from '@/constants';
 
-/**
- * Các biểu thức chính quy (Regex) kiểm tra định dạng
- */
-export const REGEX_LOGIN_ID = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
-export const REGEX_KANA = /^[\uFF66-\uFF9F\s]+$/;
-export const REGEX_EMAIL = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-export const REGEX_HALFSIZE_ASCII = /^[\x20-\x7E]+$/;
-export const REGEX_HALFSIZE_TEL = /^[0-9+() -]+$/;
-export const REGEX_HALFSIZE_NUM = /^[0-9]+$/;
+export {
+  REGEX_LOGIN_ID,
+  REGEX_KANA,
+  REGEX_EMAIL,
+  REGEX_HALFSIZE_ASCII,
+  REGEX_ALL_HALFSIZE,
+  REGEX_HALFSIZE_TEL,
+  REGEX_HALFSIZE_NUM,
+};
 
 /**
  * Zod Schema cho từng trường độc lập (dùng để validate realtime từng field khi người dùng nhập).
@@ -42,6 +51,9 @@ export const singleFieldSchemas = {
     .trim()
     .min(1, MESSAGES.ERRORS.ER001(LABELS.FIELDS.FULL_NAME_KANA))
     .max(125, MESSAGES.ERRORS.ER006(LABELS.FIELDS.FULL_NAME_KANA, 125))
+    .refine(val => REGEX_ALL_HALFSIZE.test(val), {
+      message: MESSAGES.ERRORS.ER008(LABELS.FIELDS.FULL_NAME_KANA),
+    })
     .refine(val => REGEX_KANA.test(val), {
       message: MESSAGES.ERRORS.ER009(LABELS.FIELDS.FULL_NAME_KANA),
     }),

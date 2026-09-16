@@ -45,5 +45,5 @@ public class AddEmployeeRequest {
     private Long departmentId;
 
     /** Danh sách chứng chỉ tiếng Nhật (nếu có) */
-    private List<EmployeeCertificationRequestDTO> certifications;
+    private List<EmployeeCertificationRequest> certifications;
 }

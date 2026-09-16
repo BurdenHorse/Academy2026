@@ -14,7 +14,7 @@ import static org.mockito.Mockito.when;
 import com.luvina.la.entity.EmployeeEntity;
 import com.luvina.la.exception.AppException;
 import com.luvina.la.payload.request.AddEmployeeRequest;
-import com.luvina.la.payload.request.EmployeeCertificationRequestDTO;
+import com.luvina.la.payload.request.EmployeeCertificationRequest;
 import com.luvina.la.payload.request.UpdateEmployeeRequest;
 import com.luvina.la.repository.CertificationRepository;
 import com.luvina.la.repository.DepartmentRepository;
@@ -76,7 +76,7 @@ class EmployeeValidatorTest {
         when(departmentRepository.existsById(1L)).thenReturn(true);
         when(certificationRepository.existsById(2L)).thenReturn(true);
 
-        EmployeeCertificationRequestDTO cert = new EmployeeCertificationRequestDTO();
+        EmployeeCertificationRequest cert = new EmployeeCertificationRequest();
         cert.setCertificationId(2L);
         cert.setCertificationStartDate("2023/01/01");
         cert.setCertificationEndDate("2024/01/01");
@@ -129,11 +129,12 @@ class EmployeeValidatorTest {
     }
 
     @Test
-    @DisplayName("Tên Katakana toàn giác (Full-width) -> ném ER009")
-    void testValidateKana_Fullwidth_ThrowsER009() {
+    @DisplayName("Tên Katakana toàn giác (Full-width) -> ném ER008")
+    void testValidateKana_Fullwidth_ThrowsER008() {
         validRequest.setEmployeeNameKana("グエン ヴァン エー");
         AppException ex = assertThrows(AppException.class, () -> employeeValidator.validateAddRequest(validRequest));
-        assertEquals("ER009", ex.getErrorCode());
+        assertEquals("ER008", ex.getErrorCode());
+        assertEquals("カタカナ氏名", ex.getParams().get(0));
     }
 
     @Test
@@ -192,7 +193,7 @@ class EmployeeValidatorTest {
         when(departmentRepository.existsById(1L)).thenReturn(true);
         when(certificationRepository.existsById(1L)).thenReturn(true);
 
-        EmployeeCertificationRequestDTO cert = new EmployeeCertificationRequestDTO();
+        EmployeeCertificationRequest cert = new EmployeeCertificationRequest();
         cert.setCertificationId(1L);
         cert.setCertificationStartDate("2024/01/01");
         cert.setCertificationEndDate("2023/01/01");
@@ -210,7 +211,7 @@ class EmployeeValidatorTest {
         when(departmentRepository.existsById(1L)).thenReturn(true);
         when(certificationRepository.existsById(1L)).thenReturn(true);
 
-        EmployeeCertificationRequestDTO cert = new EmployeeCertificationRequestDTO();
+        EmployeeCertificationRequest cert = new EmployeeCertificationRequest();
         cert.setCertificationId(1L);
         cert.setCertificationStartDate("2023/01/01");
         cert.setCertificationEndDate("2024/01/01");
@@ -220,6 +221,20 @@ class EmployeeValidatorTest {
         AppException ex = assertThrows(AppException.class, () -> employeeValidator.validateAddRequest(validRequest));
         assertEquals("ER018", ex.getErrorCode());
         assertEquals("点数", ex.getParams().get(0));
+    }
+
+    @Test
+    @DisplayName("validateEmployeeTelephone - chứa alphabet halfsize (0901234abc) -> hợp lệ")
+    void testValidateTelephone_HalfsizeAlphabet_Success() {
+        assertDoesNotThrow(() -> employeeValidator.validateEmployeeTelephone("0901234abc"));
+    }
+
+    @Test
+    @DisplayName("validateEmployeeTelephone - chứa full-width zenkaku -> ném ER008")
+    void testValidateTelephone_FullwidthZenkaku_ThrowsER008() {
+        AppException ex = assertThrows(AppException.class, () -> employeeValidator.validateEmployeeTelephone("０９０１２３４ａｂｃ"));
+        assertEquals("ER008", ex.getErrorCode());
+        assertEquals("電話番号", ex.getParams().get(0));
     }
 
     @Test

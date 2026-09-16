@@ -427,6 +427,7 @@ select {
 
 .row-table {
   margin: 40px 0;
+  justify-content: center;
 }
 
 .btn-falcon-default {
@@ -448,6 +449,11 @@ select {
 .pagin {
   text-align: center;
   padding: 12px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
 }
 
 .pagin .btn {
@@ -511,7 +517,7 @@ width: 100%
 
 .css-grid-table-header,
 .css-grid-table-body {
-grid-template-columns: 3% 19% 8% 9% 20% 10% 17% 9% 5%;
+grid-template-columns: 5% 18% 8.5% 8.5% 18% 10% 16% 9% 7%;
 width: 100%;
 line-height: 24px; 
 }
@@ -533,6 +539,18 @@ grid-template-rows: auto auto auto;
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
+}
+
+/* Cột ID và cột Điểm số không bao giờ hiển thị dấu ba chấm (...) */
+.css-grid-table .css-grid-table-header div:first-child,
+.css-grid-table .css-grid-table-body div:nth-child(9n+1),
+.css-grid-table .css-grid-table-header div:last-child,
+.css-grid-table .css-grid-table-body div:nth-child(9n),
+.css-grid-table .css-grid-table-body div.col-id,
+.css-grid-table .css-grid-table-body div.col-score {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
 }
 
 .css-grid-table .css-grid-table-header div:not(:first-child),

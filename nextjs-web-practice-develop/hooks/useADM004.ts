@@ -78,6 +78,14 @@ export function useADM004() {
       const err = sessionStorage.getItem(STORAGE_KEYS.SERVER_ERROR);
       if (err) {
         sessionStorage.removeItem(STORAGE_KEYS.SERVER_ERROR);
+        if (
+          err === MESSAGES.ERRORS.SYSTEM_ERROR ||
+          err === MESSAGES.ERRORS.ER015() ||
+          err === MESSAGES.ERRORS.ER023()
+        ) {
+          sessionStorage.setItem(STORAGE_KEYS.SYSTEM_ERROR_MESSAGE, MESSAGES.ERRORS.SYSTEM_ERROR);
+          return null;
+        }
         return err;
       }
     }
@@ -100,6 +108,23 @@ export function useADM004() {
   const birthDateRef = useRef<DatePicker>(null);
   const certificationStartDateRef = useRef<DatePicker>(null);
   const certificationEndDateRef = useRef<DatePicker>(null);
+
+  // Kiểm tra nếu có thông báo lỗi hệ thống cần redirect
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const sysMsg = sessionStorage.getItem(STORAGE_KEYS.SYSTEM_ERROR_MESSAGE);
+      if (sysMsg) {
+        router.replace(ROUTES.SYSTEM_ERROR);
+        return;
+      }
+    }
+
+    if (departmentError || certificationError) {
+      sessionStorage.setItem(STORAGE_KEYS.SYSTEM_ERROR_MESSAGE, MESSAGES.ERRORS.SYSTEM_ERROR);
+      router.replace(ROUTES.SYSTEM_ERROR);
+      return;
+    }
+  }, [departmentError, certificationError, router]);
 
   // Khởi tạo dữ liệu màn hình (Add hoặc Edit)
   useEffect(() => {

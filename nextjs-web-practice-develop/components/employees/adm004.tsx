@@ -4,7 +4,7 @@ import React from 'react';
 import DatePicker from 'react-datepicker';
 import { useADM004 } from '@/hooks/useADM004';
 import { parseStringToDate } from '@/utils/date';
-import { LABELS } from '@/constants';
+import { LABELS, MESSAGES } from '@/constants';
 
 /**
  * Component hiển thị toàn bộ giao diện màn hình Thêm mới / Chỉnh sửa nhân viên (ADM004).
@@ -45,8 +45,6 @@ export default function ADM004() {
     );
   }
 
-  const generalError = departmentError || certificationError;
-
   return (
     <div className="row">
       <form
@@ -58,16 +56,14 @@ export default function ADM004() {
       >
         <ul>
           <li className="title">{LABELS.TITLES.EMPLOYEE_EDIT}</li>
-          {serverError && (
-            <li className="box-err">
-              <div className="alert alert-danger mb-3">{serverError}</div>
-            </li>
-          )}
-          {generalError && (
-            <li className="box-err">
-              <div className="alert alert-danger mb-3">{generalError}</div>
-            </li>
-          )}
+          {serverError &&
+            serverError !== MESSAGES.ERRORS.SYSTEM_ERROR &&
+            serverError !== MESSAGES.ERRORS.ER015() &&
+            serverError !== MESSAGES.ERRORS.ER023() && (
+              <li className="box-err">
+                <div className="alert alert-danger mb-3">{serverError}</div>
+              </li>
+            )}
 
           {/* 1. Account Name */}
           <li className="form-group row d-flex">

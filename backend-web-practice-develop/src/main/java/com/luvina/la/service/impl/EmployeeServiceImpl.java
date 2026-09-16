@@ -18,15 +18,14 @@ import com.luvina.la.entity.EmployeeCertificationEntity;
 import com.luvina.la.entity.EmployeeEntity;
 import com.luvina.la.exception.AppException;
 import com.luvina.la.payload.request.AddEmployeeRequest;
-import com.luvina.la.payload.request.EmployeeCertificationRequestDTO;
+import com.luvina.la.payload.request.EmployeeCertificationRequest;
 import com.luvina.la.payload.request.UpdateEmployeeRequest;
 import com.luvina.la.repository.CertificationRepository;
 import com.luvina.la.repository.DepartmentRepository;
 import com.luvina.la.repository.EmployeeCertificationRepository;
 import com.luvina.la.repository.EmployeeRepository;
 import com.luvina.la.service.EmployeeService;
-import com.luvina.la.validator.EmployeeValidator;
-import java.text.SimpleDateFormat;
+import com.luvina.la.util.DateTimeUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -51,20 +50,17 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final CertificationRepository certificationRepository;
     private final EmployeeCertificationRepository employeeCertificationRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EmployeeValidator employeeValidator;
 
     public EmployeeServiceImpl(EmployeeRepository employeeRepository,
                                DepartmentRepository departmentRepository,
                                CertificationRepository certificationRepository,
                                EmployeeCertificationRepository employeeCertificationRepository,
-                               PasswordEncoder passwordEncoder,
-                               EmployeeValidator employeeValidator) {
+                               PasswordEncoder passwordEncoder) {
         this.employeeRepository = employeeRepository;
         this.departmentRepository = departmentRepository;
         this.certificationRepository = certificationRepository;
         this.employeeCertificationRepository = employeeCertificationRepository;
         this.passwordEncoder = passwordEncoder;
-        this.employeeValidator = employeeValidator;
     }
 
     /**
@@ -96,46 +92,24 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional
     public AddEmployeeDTO addEmployee(AddEmployeeRequest request) {
-        // Lấy thông tin phòng ban
-        DepartmentEntity departmentEntity = departmentRepository.findById(request.getDepartmentId())
-                .orElseThrow(() -> new AppException(Constants.ERROR_CODE_NOT_FOUND, Collections.singletonList(Constants.PARAM_NAME_GROUP)));
+        DepartmentEntity departmentEntity = departmentRepository.findById(request.getDepartmentId()).orElse(null);
 
-        Date employeeBirthDate = employeeValidator.parseDate(request.getEmployeeBirthDate().trim(), Constants.PARAM_NAME_BIRTH_DATE);
+        Date employeeBirthDate = DateTimeUtil.parseDate(request.getEmployeeBirthDate().trim());
 
-        // Tạo và lưu EmployeeEntity
         EmployeeEntity newEmployeeEntity = new EmployeeEntity();
-        newEmployeeEntity.setDepartment(departmentEntity);
-        newEmployeeEntity.setEmployeeName(request.getEmployeeName().trim());
-        newEmployeeEntity.setEmployeeNameKana(request.getEmployeeNameKana().trim());
-        newEmployeeEntity.setEmployeeBirthDate(employeeBirthDate);
-        newEmployeeEntity.setEmployeeEmail(request.getEmployeeEmail().trim());
-        newEmployeeEntity.setEmployeeTelephone(request.getEmployeeTelephone().trim());
+        mapEmployeeBasicInfo(newEmployeeEntity,
+                request.getEmployeeName(),
+                request.getEmployeeNameKana(),
+                employeeBirthDate,
+                request.getEmployeeEmail(),
+                request.getEmployeeTelephone(),
+                departmentEntity);
         newEmployeeEntity.setEmployeeLoginId(request.getEmployeeLoginId().trim());
         newEmployeeEntity.setEmployeeLoginPassword(passwordEncoder.encode(request.getEmployeeLoginPassword().trim()));
         newEmployeeEntity.setRole(Constants.ROLE_USER);
 
         EmployeeEntity savedEmployeeEntity = employeeRepository.save(newEmployeeEntity);
-
-        // Lưu certifications (nếu có)
-        List<EmployeeCertificationRequestDTO> certificationRequests = request.getCertifications();
-        if (certificationRequests != null && !certificationRequests.isEmpty()) {
-            for (EmployeeCertificationRequestDTO certificationRequestDTO : certificationRequests) {
-                CertificationEntity certificationEntity = certificationRepository.findById(certificationRequestDTO.getCertificationId())
-                        .orElseThrow(() -> new AppException(Constants.ERROR_CODE_NOT_FOUND, Collections.singletonList(Constants.PARAM_NAME_CERTIFICATION)));
-
-                Date certificationStartDate = employeeValidator.parseDate(certificationRequestDTO.getCertificationStartDate().trim(), Constants.PARAM_NAME_CERT_START_DATE);
-                Date certificationEndDate = employeeValidator.parseDate(certificationRequestDTO.getCertificationEndDate().trim(), Constants.PARAM_NAME_CERT_END_DATE);
-
-                EmployeeCertificationEntity employeeCertificationEntity = new EmployeeCertificationEntity();
-                employeeCertificationEntity.setEmployee(savedEmployeeEntity);
-                employeeCertificationEntity.setCertification(certificationEntity);
-                employeeCertificationEntity.setStartDate(certificationStartDate);
-                employeeCertificationEntity.setEndDate(certificationEndDate);
-                employeeCertificationEntity.setScore(certificationRequestDTO.getEmployeeCertificationScore().intValue());
-
-                employeeCertificationRepository.save(employeeCertificationEntity);
-            }
-        }
+        saveCertifications(savedEmployeeEntity, request.getCertifications());
 
         return new AddEmployeeDTO(savedEmployeeEntity.getEmployeeId());
     }
@@ -148,8 +122,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     public EmployeeDetailDTO getEmployeeDetail(Long employeeId) {
         EmployeeEntity employeeEntity = employeeRepository.findByEmployeeId(employeeId)
                 .orElseThrow(() -> new AppException(Constants.ERROR_CODE_USER_NOT_FOUND_GET, Collections.emptyList()));
-
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy/MM/dd");
 
         // Lấy danh sách chứng chỉ và sắp xếp theo certification_level ASC
         List<EmployeeCertificationEntity> employeeCertificationEntities = employeeCertificationRepository.findByEmployee_EmployeeId(employeeId);
@@ -166,8 +138,8 @@ public class EmployeeServiceImpl implements EmployeeService {
                 certificationDetailDTO.setCertificationId(employeeCertificationEntity.getCertification().getCertificationId());
                 certificationDetailDTO.setCertificationName(employeeCertificationEntity.getCertification().getCertificationName());
             }
-            certificationDetailDTO.setStartDate(employeeCertificationEntity.getStartDate() != null ? dateFormatter.format(employeeCertificationEntity.getStartDate()) : "");
-            certificationDetailDTO.setEndDate(employeeCertificationEntity.getEndDate() != null ? dateFormatter.format(employeeCertificationEntity.getEndDate()) : "");
+            certificationDetailDTO.setStartDate(DateTimeUtil.formatDate(employeeCertificationEntity.getStartDate()));
+            certificationDetailDTO.setEndDate(DateTimeUtil.formatDate(employeeCertificationEntity.getEndDate()));
             certificationDetailDTO.setScore(employeeCertificationEntity.getScore());
             certificationDetailDTOs.add(certificationDetailDTO);
         }
@@ -175,7 +147,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         EmployeeDetailDTO employeeDetailDTO = new EmployeeDetailDTO();
         employeeDetailDTO.setEmployeeId(employeeEntity.getEmployeeId());
         employeeDetailDTO.setEmployeeName(employeeEntity.getEmployeeName());
-        employeeDetailDTO.setEmployeeBirthDate(employeeEntity.getEmployeeBirthDate() != null ? dateFormatter.format(employeeEntity.getEmployeeBirthDate()) : "");
+        employeeDetailDTO.setEmployeeBirthDate(DateTimeUtil.formatDate(employeeEntity.getEmployeeBirthDate()));
         if (employeeEntity.getDepartment() != null) {
             employeeDetailDTO.setDepartmentId(employeeEntity.getDepartment().getDepartmentId());
             employeeDetailDTO.setDepartmentName(employeeEntity.getDepartment().getDepartmentName());
@@ -197,10 +169,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Transactional
     public DeleteEmployeeDTO deleteEmployee(Long employeeId) {
         employeeCertificationRepository.deleteByEmployee_EmployeeId(employeeId);
-        EmployeeEntity employeeEntity = employeeRepository.findByEmployeeId(employeeId).orElse(null);
-        if (employeeEntity != null) {
-            employeeRepository.delete(employeeEntity);
-        }
+        employeeRepository.deleteById(employeeId);
         return new DeleteEmployeeDTO(employeeId);
     }
 
@@ -210,21 +179,20 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional
     public UpdateEmployeeDTO updateEmployee(UpdateEmployeeRequest request) {
-        EmployeeEntity existingEmployeeEntity = employeeRepository.findByEmployeeId(request.getEmployeeId())
-                .orElseThrow(() -> new AppException(Constants.ERROR_CODE_USER_NOT_FOUND_GET, Collections.singletonList(Constants.PARAM_NAME_ID)));
+        EmployeeEntity existingEmployeeEntity = employeeRepository.findByEmployeeId(request.getEmployeeId()).orElse(null);
 
-        DepartmentEntity departmentEntity = departmentRepository.findById(request.getDepartmentId())
-                .orElseThrow(() -> new AppException(Constants.ERROR_CODE_NOT_FOUND, Collections.singletonList(Constants.PARAM_NAME_GROUP)));
+        DepartmentEntity departmentEntity = departmentRepository.findById(request.getDepartmentId()).orElse(null);
 
-        Date employeeBirthDate = employeeValidator.parseDate(request.getEmployeeBirthDate().trim(), Constants.PARAM_NAME_BIRTH_DATE);
+        Date employeeBirthDate = DateTimeUtil.parseDate(request.getEmployeeBirthDate().trim());
 
-        // Cập nhật thông tin Employee
-        existingEmployeeEntity.setDepartment(departmentEntity);
-        existingEmployeeEntity.setEmployeeName(request.getEmployeeName().trim());
-        existingEmployeeEntity.setEmployeeNameKana(request.getEmployeeNameKana().trim());
-        existingEmployeeEntity.setEmployeeBirthDate(employeeBirthDate);
-        existingEmployeeEntity.setEmployeeEmail(request.getEmployeeEmail().trim());
-        existingEmployeeEntity.setEmployeeTelephone(request.getEmployeeTelephone().trim());
+        // Cập nhật thông tin cơ bản của Employee
+        mapEmployeeBasicInfo(existingEmployeeEntity,
+                request.getEmployeeName(),
+                request.getEmployeeNameKana(),
+                employeeBirthDate,
+                request.getEmployeeEmail(),
+                request.getEmployeeTelephone(),
+                departmentEntity);
 
         // Mật khẩu: Chỉ cập nhật nếu người dùng nhập mật khẩu mới
         if (request.getEmployeeLoginPassword() != null && !request.getEmployeeLoginPassword().trim().isEmpty()) {
@@ -238,27 +206,51 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeCertificationRepository.flush();
 
         // Thêm các chứng chỉ mới (nếu có)
-        List<EmployeeCertificationRequestDTO> certificationRequests = request.getCertifications();
-        if (certificationRequests != null && !certificationRequests.isEmpty()) {
-            for (EmployeeCertificationRequestDTO certificationRequestDTO : certificationRequests) {
-                CertificationEntity certificationEntity = certificationRepository.findById(certificationRequestDTO.getCertificationId())
-                        .orElseThrow(() -> new AppException(Constants.ERROR_CODE_NOT_FOUND, Collections.singletonList(Constants.PARAM_NAME_CERTIFICATION)));
-
-                Date certificationStartDate = employeeValidator.parseDate(certificationRequestDTO.getCertificationStartDate().trim(), Constants.PARAM_NAME_CERT_START_DATE);
-                Date certificationEndDate = employeeValidator.parseDate(certificationRequestDTO.getCertificationEndDate().trim(), Constants.PARAM_NAME_CERT_END_DATE);
-
-                EmployeeCertificationEntity employeeCertificationEntity = new EmployeeCertificationEntity();
-                employeeCertificationEntity.setEmployee(savedEmployeeEntity);
-                employeeCertificationEntity.setCertification(certificationEntity);
-                employeeCertificationEntity.setStartDate(certificationStartDate);
-                employeeCertificationEntity.setEndDate(certificationEndDate);
-                employeeCertificationEntity.setScore(certificationRequestDTO.getEmployeeCertificationScore().intValue());
-
-                employeeCertificationRepository.save(employeeCertificationEntity);
-            }
-        }
+        saveCertifications(savedEmployeeEntity, request.getCertifications());
 
         return new UpdateEmployeeDTO(savedEmployeeEntity.getEmployeeId());
+    }
+
+    /**
+     * Gán các thông tin cơ bản của nhân viên vào Entity dùng chung cho cả thêm mới và cập nhật.
+     */
+    private void mapEmployeeBasicInfo(EmployeeEntity entity,
+                                      String name,
+                                      String nameKana,
+                                      Date birthDate,
+                                      String email,
+                                      String telephone,
+                                      DepartmentEntity department) {
+        entity.setDepartment(department);
+        entity.setEmployeeName(name.trim());
+        entity.setEmployeeNameKana(nameKana.trim());
+        entity.setEmployeeBirthDate(birthDate);
+        entity.setEmployeeEmail(email.trim());
+        entity.setEmployeeTelephone(telephone.trim());
+    }
+
+    /**
+     * Lưu danh sách chứng chỉ tiếng Nhật của nhân viên dùng chung cho cả thêm mới và cập nhật.
+     */
+    private void saveCertifications(EmployeeEntity employee, List<EmployeeCertificationRequest> certificationRequests) {
+        if (certificationRequests == null || certificationRequests.isEmpty()) {
+            return;
+        }
+        for (EmployeeCertificationRequest certReq : certificationRequests) {
+            CertificationEntity certEntity = certificationRepository.findById(certReq.getCertificationId()).orElse(null);
+
+            Date startDate = DateTimeUtil.parseDate(certReq.getCertificationStartDate().trim());
+            Date endDate = DateTimeUtil.parseDate(certReq.getCertificationEndDate().trim());
+
+            EmployeeCertificationEntity entity = new EmployeeCertificationEntity();
+            entity.setEmployee(employee);
+            entity.setCertification(certEntity);
+            entity.setStartDate(startDate);
+            entity.setEndDate(endDate);
+            entity.setScore(certReq.getEmployeeCertificationScore().intValue());
+
+            employeeCertificationRepository.save(entity);
+        }
     }
 }
 

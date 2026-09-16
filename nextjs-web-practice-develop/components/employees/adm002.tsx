@@ -27,6 +27,7 @@ export default function ADM002() {
     totalPages,
     currentPage,
     truncateText,
+    formatScore,
   } = useADM002();
 
   /**
@@ -36,7 +37,7 @@ export default function ADM002() {
     if (totalPages <= 1) return null;
 
     return (
-      <div className="pagin mt-3 d-flex justify-content-end">
+      <div className="pagin mt-3 d-flex justify-content-center w-100 col-12">
         {/* Nút lùi: disabled khi ở trang đầu */}
         <button
           className={`btn btn-sm btn-pre btn-falcon-default ${currentPage === 1 ? 'btn-disabled' : ''}`}
@@ -212,13 +213,13 @@ export default function ADM002() {
               <div style={{ cursor: 'pointer' }} onClick={() => handleSort('ord_end_date')}>
                 {LABELS.FIELDS.EXPIRATION_DATE} {getSortIcon('ord_end_date')}
               </div>
-              <div>{LABELS.FIELDS.SCORE}</div>
+              <div className="text-center">{LABELS.FIELDS.SCORE}</div>
             </div>
 
             <div className="css-grid-table-body">
               {employees.map((emp) => (
                 <React.Fragment key={`${emp.employeeId}-${emp.certificationName || 'none'}`}>
-                  <div className="bor-l-none text-center">
+                  <div className="bor-l-none text-center col-id">
                     <Link href={`${ROUTES.EMPLOYEES.DETAIL}?id=${emp.employeeId}`}>
                       {emp.employeeId}
                     </Link>
@@ -232,7 +233,7 @@ export default function ADM002() {
                     {truncateText(emp.certificationName, 22)}
                   </div>
                   <div>{emp.endDate || ''}</div>
-                  <div>{emp.score || ''}</div>
+                  <div className="text-center col-score">{formatScore(emp.score)}</div>
                 </React.Fragment>
               ))}
             </div>

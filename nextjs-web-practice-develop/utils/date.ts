@@ -1,7 +1,6 @@
-/**
- * Regex kiểm tra định dạng chuỗi ngày tháng yyyy/MM/dd.
- */
-export const REGEX_DATE_FORMAT = /^\d{4}\/\d{2}\/\d{2}$/;
+import { REGEX_DATE_FORMAT } from './regex';
+
+export { REGEX_DATE_FORMAT };
 
 /**
  * Kiểm tra tính hợp lệ của chuỗi ngày tháng theo lịch thực tế (yyyy/MM/dd).

@@ -94,7 +94,7 @@ describe('useADM005 Hook', () => {
       expect(sessionStorage.getItem(STORAGE_KEYS.SERVER_ERROR)).toBe('「アカウント名」は既に存在しています。');
     });
 
-    it('redirects to ADM004 when backend returns non-200 or ER023', async () => {
+    it('redirects to /system-error when backend returns system error (500 or ER023)', async () => {
       mockedAddEmployee.mockRejectedValue({
         isAxiosError: true,
         response: {
@@ -115,9 +115,10 @@ describe('useADM005 Hook', () => {
         await result.current.handleSave();
       });
 
-      expect(mockPush).toHaveBeenCalledWith(ROUTES.EMPLOYEES.ADD_EDIT);
-      expect(sessionStorage.getItem(STORAGE_KEYS.SERVER_ERROR)).toBe('システムエラーが発生しました。');
-      expect(sessionStorage.getItem(STORAGE_KEYS.FORM_DATA)).toBe(JSON.stringify(sampleFormData));
+      expect(mockReplace).toHaveBeenCalledWith(ROUTES.SYSTEM_ERROR);
+      expect(sessionStorage.getItem(STORAGE_KEYS.SYSTEM_ERROR_MESSAGE)).toBe('システムエラーが発生しました。');
+      expect(sessionStorage.getItem(STORAGE_KEYS.SERVER_ERROR)).toBeNull();
+      expect(sessionStorage.getItem(STORAGE_KEYS.FORM_DATA)).toBeNull();
     });
 
     it('redirects to ADM006, clears form data, and sets MSG001 when backend succeeds with 200', async () => {
@@ -263,6 +264,34 @@ describe('useADM005 Hook', () => {
 
       expect(mockPush).toHaveBeenCalledWith(`${ROUTES.EMPLOYEES.ADD_EDIT}?id=15`);
       expect(sessionStorage.getItem(STORAGE_KEYS.SERVER_ERROR)).toBe('「アカウント名」は既に存在しています。');
+    });
+
+    it('redirects to /system-error when updateEmployee returns system error (500 or ER015/ER023)', async () => {
+      mockedGetEmployeeDetail.mockResolvedValue({ employeeId: 15 });
+      mockedUpdateEmployee.mockRejectedValue({
+        isAxiosError: true,
+        response: {
+          status: 500,
+          data: {
+            code: '500',
+            message: {
+              code: 'ER015',
+              params: [],
+            },
+          },
+        },
+      });
+
+      const { result } = renderHook(() => useADM005());
+
+      await act(async () => {
+        await result.current.handleSave();
+      });
+
+      expect(mockReplace).toHaveBeenCalledWith(ROUTES.SYSTEM_ERROR);
+      expect(sessionStorage.getItem(STORAGE_KEYS.SYSTEM_ERROR_MESSAGE)).toBe('システムエラーが発生しました。');
+      expect(sessionStorage.getItem(STORAGE_KEYS.SERVER_ERROR)).toBeNull();
+      expect(sessionStorage.getItem(STORAGE_KEYS.FORM_DATA)).toBeNull();
     });
 
     it('navigates back to ADM004 with id param on handleBack', () => {

@@ -191,6 +191,18 @@ describe('useADM004 Hook - Mode Add (No ID param)', () => {
     expect(sessionStorage.getItem('ADM004_SERVER_ERROR')).toBeNull();
     expect(sessionStorage.getItem('ADM004_FORM_DATA')).not.toBeNull();
   });
+
+  it('redirects to /system-error if serverError in sessionStorage is system error', () => {
+    sessionStorage.setItem('ADM004_SERVER_ERROR', MESSAGES.ERRORS.SYSTEM_ERROR);
+
+    const { result } = renderHook(() => useADM004());
+
+    expect(result.current.serverError).toBeNull();
+    expect(mockReplace).toHaveBeenCalledWith(ROUTES.SYSTEM_ERROR);
+    expect(sessionStorage.getItem(STORAGE_KEYS.SYSTEM_ERROR_MESSAGE)).toBe(
+      MESSAGES.ERRORS.SYSTEM_ERROR
+    );
+  });
 });
 
 describe('useADM004 Hook - Mode Edit (With ID param)', () => {

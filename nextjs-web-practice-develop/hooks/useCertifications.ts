@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { certificationApi } from '@/lib/api/certification';
 import { CertificationDTO } from '@/types/certification';
-import { MESSAGES } from '@/constants';
+import { MESSAGES, RESPONSE_CODES } from '@/constants';
 
 /**
  * Custom hook quản lý việc lấy danh sách chứng chỉ tiếng Nhật (Certifications).
@@ -21,7 +21,7 @@ export function useCertifications() {
     setCertificationError(null);
     try {
       const res = await certificationApi.getCertifications();
-      if (res.code === "200") {
+      if (res.code === RESPONSE_CODES.SUCCESS) {
         setCertifications(res.certifications || []);
       } else {
         setCertificationError(MESSAGES.ERRORS.SYSTEM_ERROR);

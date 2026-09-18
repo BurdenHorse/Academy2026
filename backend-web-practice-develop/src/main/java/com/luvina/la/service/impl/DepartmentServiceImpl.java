@@ -6,11 +6,10 @@ package com.luvina.la.service.impl;
  */
 
 import com.luvina.la.dto.DepartmentDTO;
+import com.luvina.la.mapper.DepartmentMapper;
 import com.luvina.la.repository.DepartmentRepository;
 import com.luvina.la.service.DepartmentService;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,14 +23,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
+    private final DepartmentMapper departmentMapper;
 
     /**
-     * Constructor injection cho DepartmentRepository.
+     * Constructor injection cho DepartmentRepository và DepartmentMapper.
      *
      * @param departmentRepository Repository truy vấn dữ liệu phòng ban
+     * @param departmentMapper     Mapper chuyển đổi Entity sang DTO
      */
-    public DepartmentServiceImpl(DepartmentRepository departmentRepository) {
+    public DepartmentServiceImpl(DepartmentRepository departmentRepository, DepartmentMapper departmentMapper) {
         this.departmentRepository = departmentRepository;
+        this.departmentMapper = departmentMapper;
     }
 
     /**
@@ -42,10 +44,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @Transactional(readOnly = true)
     public List<DepartmentDTO> getAllDepartments() {
-        return StreamSupport.stream(departmentRepository.findAll().spliterator(), false)
-                .map(departmentEntity -> new DepartmentDTO(
-                        String.valueOf(departmentEntity.getDepartmentId()),
-                        departmentEntity.getDepartmentName()))
-                .collect(Collectors.toList());
+        return departmentMapper.toDTOList(departmentRepository.findAllByOrderByDepartmentIdAsc());
     }
 }

@@ -6,6 +6,7 @@ package com.luvina.la.repository;
  */
 
 import com.luvina.la.entity.DepartmentEntity;
+import java.util.List;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -18,4 +19,11 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface DepartmentRepository extends CrudRepository<DepartmentEntity, Long> {
+
+    /**
+     * Lấy danh sách tất cả phòng ban theo thứ tự ID tăng dần.
+     *
+     * @return Danh sách phòng ban sắp xếp theo departmentId ASC
+     */
+    List<DepartmentEntity> findAllByOrderByDepartmentIdAsc();
 }

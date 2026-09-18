@@ -10,7 +10,7 @@ import {
   REGEX_HALFSIZE_TEL,
   REGEX_HALFSIZE_NUM,
 } from '@/utils';
-import { LABELS, MESSAGES } from '@/constants';
+import { LABELS, MESSAGES, VALIDATION_LIMITS } from '@/constants';
 
 export {
   REGEX_LOGIN_ID,
@@ -30,7 +30,7 @@ export const singleFieldSchemas = {
     .string()
     .trim()
     .min(1, MESSAGES.ERRORS.ER001(LABELS.FIELDS.ACCOUNT_NAME))
-    .max(50, MESSAGES.ERRORS.ER006(LABELS.FIELDS.ACCOUNT_NAME, 50))
+    .max(VALIDATION_LIMITS.MAX_LOGIN_ID, MESSAGES.ERRORS.ER006(LABELS.FIELDS.ACCOUNT_NAME, VALIDATION_LIMITS.MAX_LOGIN_ID))
     .refine(val => REGEX_LOGIN_ID.test(val) && !/^[0-9]/.test(val), {
       message: MESSAGES.ERRORS.ER019(),
     }),
@@ -44,13 +44,13 @@ export const singleFieldSchemas = {
     .string()
     .trim()
     .min(1, MESSAGES.ERRORS.ER001(LABELS.FIELDS.FULL_NAME))
-    .max(125, MESSAGES.ERRORS.ER006(LABELS.FIELDS.FULL_NAME, 125)),
+    .max(VALIDATION_LIMITS.MAX_FULL_NAME, MESSAGES.ERRORS.ER006(LABELS.FIELDS.FULL_NAME, VALIDATION_LIMITS.MAX_FULL_NAME)),
 
   employeeNameKana: z
     .string()
     .trim()
     .min(1, MESSAGES.ERRORS.ER001(LABELS.FIELDS.FULL_NAME_KANA))
-    .max(125, MESSAGES.ERRORS.ER006(LABELS.FIELDS.FULL_NAME_KANA, 125))
+    .max(VALIDATION_LIMITS.MAX_FULL_NAME_KANA, MESSAGES.ERRORS.ER006(LABELS.FIELDS.FULL_NAME_KANA, VALIDATION_LIMITS.MAX_FULL_NAME_KANA))
     .refine(val => REGEX_ALL_HALFSIZE.test(val), {
       message: MESSAGES.ERRORS.ER008(LABELS.FIELDS.FULL_NAME_KANA),
     })
@@ -70,19 +70,19 @@ export const singleFieldSchemas = {
     .string()
     .trim()
     .min(1, MESSAGES.ERRORS.ER001(LABELS.FIELDS.EMAIL))
-    .max(125, MESSAGES.ERRORS.ER006(LABELS.FIELDS.EMAIL, 125))
+    .max(VALIDATION_LIMITS.MAX_EMAIL, MESSAGES.ERRORS.ER006(LABELS.FIELDS.EMAIL, VALIDATION_LIMITS.MAX_EMAIL))
     .refine(val => REGEX_HALFSIZE_ASCII.test(val), {
       message: MESSAGES.ERRORS.ER008(LABELS.FIELDS.EMAIL),
     })
     .refine(val => REGEX_EMAIL.test(val), {
-      message: MESSAGES.ERRORS.ER005(LABELS.FIELDS.EMAIL, 'メール'),
+      message: MESSAGES.ERRORS.ER005(LABELS.FIELDS.EMAIL, LABELS.FORMAT.EMAIL),
     }),
 
   employeeTelephone: z
     .string()
     .trim()
     .min(1, MESSAGES.ERRORS.ER001(LABELS.FIELDS.TELEPHONE))
-    .max(50, MESSAGES.ERRORS.ER006(LABELS.FIELDS.TELEPHONE, 50))
+    .max(VALIDATION_LIMITS.MAX_TELEPHONE, MESSAGES.ERRORS.ER006(LABELS.FIELDS.TELEPHONE, VALIDATION_LIMITS.MAX_TELEPHONE))
     .refine(val => REGEX_HALFSIZE_TEL.test(val), {
       message: MESSAGES.ERRORS.ER008(LABELS.FIELDS.TELEPHONE),
     }),
@@ -91,8 +91,8 @@ export const singleFieldSchemas = {
     .string()
     .trim()
     .min(1, MESSAGES.ERRORS.ER001(LABELS.FIELDS.PASSWORD))
-    .refine(val => val.length >= 8 && val.length <= 50, {
-      message: MESSAGES.ERRORS.ER007(LABELS.FIELDS.PASSWORD, 8, 50),
+    .refine(val => val.length >= VALIDATION_LIMITS.MIN_PASSWORD && val.length <= VALIDATION_LIMITS.MAX_PASSWORD, {
+      message: MESSAGES.ERRORS.ER007(LABELS.FIELDS.PASSWORD, VALIDATION_LIMITS.MIN_PASSWORD, VALIDATION_LIMITS.MAX_PASSWORD),
     }),
 
   employeeLoginPasswordConfirm: z
@@ -258,11 +258,11 @@ export const employeeEditFormSchema = z
 
     // 1. Validate password & confirm password ở Mode Edit
     if (password) {
-      if (password.length < 8 || password.length > 50) {
+      if (password.length < VALIDATION_LIMITS.MIN_PASSWORD || password.length > VALIDATION_LIMITS.MAX_PASSWORD) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['employeeLoginPassword'],
-          message: MESSAGES.ERRORS.ER007(LABELS.FIELDS.PASSWORD, 8, 50),
+          message: MESSAGES.ERRORS.ER007(LABELS.FIELDS.PASSWORD, VALIDATION_LIMITS.MIN_PASSWORD, VALIDATION_LIMITS.MAX_PASSWORD),
         });
       }
       if (!confirm) {
@@ -311,8 +311,8 @@ export function validateEmployeeField(
   if (isEditMode) {
     if (field === 'employeeLoginPassword') {
       if (!trimmed) return '';
-      if (trimmed.length < 8 || trimmed.length > 50) {
-        return MESSAGES.ERRORS.ER007(LABELS.FIELDS.PASSWORD, 8, 50);
+      if (trimmed.length < VALIDATION_LIMITS.MIN_PASSWORD || trimmed.length > VALIDATION_LIMITS.MAX_PASSWORD) {
+        return MESSAGES.ERRORS.ER007(LABELS.FIELDS.PASSWORD, VALIDATION_LIMITS.MIN_PASSWORD, VALIDATION_LIMITS.MAX_PASSWORD);
       }
       return '';
     }

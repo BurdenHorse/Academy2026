@@ -39,7 +39,6 @@ public class EmployeeValidator {
     private static final Pattern KANA_PATTERN = Pattern.compile("^[\\uFF66-\\uFF9F\\s]+$");
     private static final Pattern ALL_HALFSIZE_PATTERN = Pattern.compile("^[\\x20-\\x7E\\uFF61-\\uFF9F]+$");
     private static final Pattern HALFSIZE_PATTERN = Pattern.compile("^[a-zA-Z0-9+() -]+$");
-    private static final Pattern DATE_FORMAT_PATTERN = Pattern.compile("^\\d{4}/\\d{2}/\\d{2}$");
 
     @Autowired
     private EmployeeRepository employeeRepository;
@@ -251,8 +250,8 @@ public class EmployeeValidator {
     public void validateEmployeeLoginPasswordForUpdate(String password) {
         if (password != null && !password.trim().isEmpty()) {
             String trimmedPassword = password.trim();
-            if (trimmedPassword.length() < 8 || trimmedPassword.length() > 50) {
-                throw new AppException(Constants.ERROR_CODE_LENGTH_RANGE, Arrays.asList(Constants.PARAM_NAME_PASSWORD, "8", "50"));
+            if (trimmedPassword.length() < Constants.MIN_LENGTH_PASSWORD || trimmedPassword.length() > Constants.MAX_LENGTH_PASSWORD) {
+                throw new AppException(Constants.ERROR_CODE_LENGTH_RANGE, Arrays.asList(Constants.PARAM_NAME_PASSWORD, String.valueOf(Constants.MIN_LENGTH_PASSWORD), String.valueOf(Constants.MAX_LENGTH_PASSWORD)));
             }
         }
     }
@@ -261,7 +260,7 @@ public class EmployeeValidator {
      * Validate 1.1: [employeeLoginId]
      */
     public void validateEmployeeLoginId(String loginId) {
-        String trimmedLoginId = validateRequiredAndMaxLength(loginId, 50, Constants.PARAM_NAME_ACCOUNT);
+        String trimmedLoginId = validateRequiredAndMaxLength(loginId, Constants.MAX_LENGTH_ACCOUNT_NAME, Constants.PARAM_NAME_ACCOUNT);
         if (!LOGIN_ID_PATTERN.matcher(trimmedLoginId).matches() || Character.isDigit(trimmedLoginId.charAt(0))) {
             throw new AppException(Constants.ERROR_CODE_LOGIN_ID_FORMAT, Collections.singletonList(Constants.PARAM_NAME_ACCOUNT));
         }
@@ -274,14 +273,14 @@ public class EmployeeValidator {
      * Validate 1.2: [employeeName]
      */
     public void validateEmployeeName(String name) {
-        validateRequiredAndMaxLength(name, 125, Constants.PARAM_NAME_EMPLOYEE_NAME);
+        validateRequiredAndMaxLength(name, Constants.MAX_LENGTH_EMPLOYEE_NAME, Constants.PARAM_NAME_EMPLOYEE_NAME);
     }
 
     /**
      * Validate 1.3: [employeeNameKana] (chỉ nhận halfsize Katakana)
      */
     public void validateEmployeeNameKana(String nameKana) {
-        String trimmedNameKana = validateRequiredAndMaxLength(nameKana, 125, Constants.PARAM_NAME_FULL_NAME_KANA);
+        String trimmedNameKana = validateRequiredAndMaxLength(nameKana, Constants.MAX_LENGTH_FULL_NAME_KANA, Constants.PARAM_NAME_FULL_NAME_KANA);
         if (!ALL_HALFSIZE_PATTERN.matcher(trimmedNameKana).matches()) {
             throw new AppException(Constants.ERROR_CODE_HALFSIZE, Collections.singletonList(Constants.PARAM_NAME_FULL_NAME_KANA));
         }
@@ -304,14 +303,14 @@ public class EmployeeValidator {
      * Validate 1.5: [employeeEmail]
      */
     public void validateEmployeeEmail(String email) {
-        validateRequiredAndMaxLength(email, 125, Constants.PARAM_NAME_EMAIL);
+        validateRequiredAndMaxLength(email, Constants.MAX_LENGTH_EMAIL, Constants.PARAM_NAME_EMAIL);
     }
 
     /**
      * Validate 1.6: [employeeTelephone]
      */
     public void validateEmployeeTelephone(String telephone) {
-        String trimmedTelephone = validateRequiredAndMaxLength(telephone, 50, Constants.PARAM_NAME_TELEPHONE);
+        String trimmedTelephone = validateRequiredAndMaxLength(telephone, Constants.MAX_LENGTH_TELEPHONE, Constants.PARAM_NAME_TELEPHONE);
         if (!HALFSIZE_PATTERN.matcher(trimmedTelephone).matches()) {
             throw new AppException(Constants.ERROR_CODE_HALFSIZE, Collections.singletonList(Constants.PARAM_NAME_TELEPHONE));
         }

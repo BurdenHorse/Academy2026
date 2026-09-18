@@ -3,15 +3,16 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { removeToken } from '@/lib/auth/token';
+import { ROUTES, LABELS } from '@/constants';
 
 export default function LogoutPage() {
   const router = useRouter();
 
   useEffect(() => {
     removeToken();
-    router.push('/login');
+    router.push(ROUTES.LOGIN);
   }, [router]);
 
-  return <div>Logging out...</div>;
+  return <div>{LABELS.STATUS.LOGGING_OUT}</div>;
 }
 

@@ -3,6 +3,7 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ROUTES, MESSAGES, LABELS, STORAGE_KEYS } from '@/constants';
+import { getToken } from '@/lib/auth/token';
 
 function SystemErrorContent() {
   const router = useRouter();
@@ -29,7 +30,7 @@ function SystemErrorContent() {
    * - Nếu chưa đăng nhập: chuyển về trang đăng nhập ADM001.
    */
   const handleOk = () => {
-    const token = typeof window !== 'undefined' ? sessionStorage.getItem('access_token') : null;
+    const token = typeof window !== 'undefined' ? getToken() : null;
     if (token) {
       router.push(ROUTES.EMPLOYEES.LIST);
     } else {
@@ -59,7 +60,7 @@ function SystemErrorContent() {
  */
 export default function SystemErrorPage() {
   return (
-    <Suspense fallback={<div>読み込み中...</div>}>
+    <Suspense fallback={<div>{LABELS.STATUS.LOADING}</div>}>
       <SystemErrorContent />
     </Suspense>
   );

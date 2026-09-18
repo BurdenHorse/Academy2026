@@ -1,5 +1,6 @@
 import { apiClient } from './client';
 import { LoginRequest, LoginResponse } from '@/types/auth';
+import { API_ENDPOINTS } from '@/constants';
 
 /**
  * Module cung cấp các hàm gọi API liên quan đến xác thực người dùng.
@@ -12,7 +13,7 @@ export const authApi = {
    * @returns Promise chứa thông tin response (accessToken, tokenType hoặc lỗi)
    */
   login: async (data: LoginRequest): Promise<LoginResponse> => {
-    const response = await apiClient.post<LoginResponse>('/login', data);
+    const response = await apiClient.post<LoginResponse>(API_ENDPOINTS.LOGIN, data);
     return response.data;
   },
 };

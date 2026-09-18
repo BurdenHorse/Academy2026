@@ -22,7 +22,7 @@ export default function ADM003() {
     return (
       <div className="row">
         <div className="c-form box-shadow text-center p-4">
-          <div>読み込み中...</div>
+          <div>{LABELS.STATUS.LOADING}</div>
         </div>
       </div>
     );

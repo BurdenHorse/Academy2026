@@ -7,6 +7,7 @@ package com.luvina.la.repository;
 
 import com.luvina.la.config.Constants;
 import com.luvina.la.dto.EmployeeListDTO;
+import com.luvina.la.mapper.EmployeeMapper;
 import com.luvina.la.util.StringUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,14 +46,20 @@ public class EmployeeRepositoryCustomImpl implements EmployeeRepositoryCustom {
 
     static {
         Map<String, String> map = new LinkedHashMap<>();
-        map.put("ord_employee_name", "e.employee_name");
-        map.put("ord_certification_name", "c.certification_name");
-        map.put("ord_end_date", "ec.end_date");
+        map.put(Constants.PARAM_ORD_EMPLOYEE_NAME, "e.employee_name");
+        map.put(Constants.PARAM_ORD_CERTIFICATION_NAME, "c.certification_name");
+        map.put(Constants.PARAM_ORD_END_DATE, "ec.end_date");
         SORT_COLUMN_MAP = Collections.unmodifiableMap(map);
     }
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    private final EmployeeMapper employeeMapper;
+
+    public EmployeeRepositoryCustomImpl(EmployeeMapper employeeMapper) {
+        this.employeeMapper = employeeMapper;
+    }
 
     /**
      * {@inheritDoc}
@@ -65,29 +72,35 @@ public class EmployeeRepositoryCustomImpl implements EmployeeRepositoryCustom {
      * 5. Map kết quả Object[] sang EmployeeListDTO</p>
      */
     @Override
-    public List<EmployeeListDTO> searchEmployees(String employeeName, Long departmentId,
-                                                  String ordEmployeeName, String ordCertificationName,
-                                                  String ordEndDate, String sortPriority,
-                                                  int offset, int limit) {
+    public List<EmployeeListDTO> searchEmployees(
+            String employeeName,
+            Long departmentId,
+            String ordEmployeeName,
+            String ordCertificationName,
+            String ordEndDate,
+            String sortPriority,
+            int offset,
+            int limit) {
         // Xây dựng câu truy vấn Native SQL động
+        // Tạo câu SELECT cơ bản
         StringBuilder sqlBuilder = buildSelectQuery();
+        // Thêm điều kiện WHERE tuỳ chỉnh dựa trên các tham số employeeName, departmentId
         appendWhereClause(sqlBuilder, employeeName, departmentId);
+        // Thêm Điều kiện OrderBy để thực hiện sort theo 3 hạng mục
         appendOrderByClause(sqlBuilder, ordEmployeeName, ordCertificationName, ordEndDate, sortPriority);
+        // Thực hiện phân trang
         sqlBuilder.append("LIMIT :limit OFFSET :offset ");
 
+        // Chuyển sang query
         Query query = entityManager.createNativeQuery(sqlBuilder.toString());
         setQueryParameters(query, employeeName, departmentId);
         query.setParameter("limit", limit);
         query.setParameter("offset", offset);
 
-        // Map kết quả từ Object[] sang EmployeeListDTO
+        // Map kết quả từ Object[] sang EmployeeListDTO qua EmployeeMapper
         @SuppressWarnings("unchecked")
         List<Object[]> queryResults = query.getResultList();
-        List<EmployeeListDTO> employeeListDTOs = new ArrayList<>(queryResults.size());
-        for (Object[] resultRow : queryResults) {
-            employeeListDTOs.add(mapToEmployeeListDTO(resultRow));
-        }
-        return employeeListDTOs;
+        return employeeMapper.toEmployeeListDTOList(queryResults);
     }
 
     /**
@@ -121,12 +134,12 @@ public class EmployeeRepositoryCustomImpl implements EmployeeRepositoryCustom {
         sqlBuilder.append("SELECT ");
         sqlBuilder.append("e.employee_id, ");
         sqlBuilder.append("e.employee_name, ");
-        sqlBuilder.append("DATE_FORMAT(e.employee_birth_date, '%Y/%m/%d') AS employee_birth_date, ");
+        sqlBuilder.append("DATE_FORMAT(e.employee_birth_date, '").append(Constants.SQL_DATE_FORMAT).append("') AS employee_birth_date, ");
         sqlBuilder.append("d.department_name, ");
         sqlBuilder.append("e.employee_email, ");
         sqlBuilder.append("e.employee_telephone, ");
         sqlBuilder.append("c.certification_name, ");
-        sqlBuilder.append("DATE_FORMAT(ec.end_date, '%Y/%m/%d') AS end_date, ");
+        sqlBuilder.append("DATE_FORMAT(ec.end_date, '").append(Constants.SQL_DATE_FORMAT).append("') AS end_date, ");
         sqlBuilder.append("ec.score ");
         sqlBuilder.append(FROM_EMPLOYEES_JOIN);
         return sqlBuilder;
@@ -170,16 +183,18 @@ public class EmployeeRepositoryCustomImpl implements EmployeeRepositoryCustom {
                                       String ordCertificationName, String ordEndDate,
                                       String sortPriority) {
         // Map tên param -> direction (ASC/DESC)
+
         // Nếu không truyền sort param → mặc định ASC theo thứ tự ưu tiên ban đầu
         Map<String, String> sortDirectionMap = new HashMap<>();
-        sortDirectionMap.put("ord_employee_name", ordEmployeeName != null ? ordEmployeeName : Constants.SORT_ASC);
-        sortDirectionMap.put("ord_certification_name", ordCertificationName != null ? ordCertificationName : Constants.SORT_ASC);
-        sortDirectionMap.put("ord_end_date", ordEndDate != null ? ordEndDate : Constants.SORT_ASC);
+        sortDirectionMap.put(Constants.PARAM_ORD_EMPLOYEE_NAME, ordEmployeeName != null ? ordEmployeeName : Constants.SORT_ASC);
+        sortDirectionMap.put(Constants.PARAM_ORD_CERTIFICATION_NAME, ordCertificationName != null ? ordCertificationName : Constants.SORT_ASC);
+        sortDirectionMap.put(Constants.PARAM_ORD_END_DATE, ordEndDate != null ? ordEndDate : Constants.SORT_ASC);
 
+        // Có truyền sort param
         // Xác định thứ tự ưu tiên: dùng sortPriority nếu có, không thì dùng thứ tự mặc định
         List<String> priorityOrder;
         if (!StringUtil.isNullOrEmpty(sortPriority)) {
-            priorityOrder = StringUtil.splitAndTrim(sortPriority, ",").stream()
+            priorityOrder = StringUtil.splitAndTrim(sortPriority, Constants.DELIMITER_COMMA).stream()
                 .filter(SORT_COLUMN_MAP::containsKey)
                 .collect(Collectors.toList());
             // Thêm các cột còn thiếu vào cuối (giữ thứ tự mặc định)
@@ -207,26 +222,6 @@ public class EmployeeRepositoryCustomImpl implements EmployeeRepositoryCustom {
         }
 
         sql.append("ORDER BY ").append(String.join(", ", orderClauses)).append(" ");
-    }
-
-    /**
-     * Map một dòng kết quả Native Query (Object[]) sang EmployeeListDTO.
-     *
-     * @param resultRow Mảng chứa giá trị các cột trả về từ DB
-     * @return Đối tượng EmployeeListDTO
-     */
-    private EmployeeListDTO mapToEmployeeListDTO(Object[] resultRow) {
-        return new EmployeeListDTO(
-                resultRow[0] != null ? String.valueOf(resultRow[0]) : null,  // employee_id
-                (String) resultRow[1],                                 // employee_name
-                (String) resultRow[2],                                 // employee_birth_date (đã format yyyy/MM/dd)
-                (String) resultRow[3],                                 // department_name
-                (String) resultRow[4],                                 // employee_email
-                (String) resultRow[5],                                 // employee_telephone
-                (String) resultRow[6],                                 // certification_name
-                (String) resultRow[7],                                 // end_date (đã format yyyy/MM/dd)
-                resultRow[8] != null ? StringUtil.formatScore(resultRow[8]) : null   // score (đã format loại bỏ .00)
-        );
     }
 
     /**

@@ -9,6 +9,7 @@ import {
   EmployeeDetailResponse,
   DeleteEmployeeResponse
 } from '@/types/employee';
+import { API_ENDPOINTS } from '@/constants';
 
 /**
  * Module cung cấp các hàm gọi API liên quan đến quản lý nhân viên.
@@ -33,7 +34,7 @@ export const employeeApi = {
     if (params.offset !== undefined) queryParams.offset = params.offset;
     if (params.limit !== undefined) queryParams.limit = params.limit;
 
-    const response = await apiClient.get<EmployeeListResponse>('/employee', {
+    const response = await apiClient.get<EmployeeListResponse>(API_ENDPOINTS.EMPLOYEE, {
       params: queryParams,
     });
     return response.data;
@@ -47,7 +48,7 @@ export const employeeApi = {
    * @returns Promise<AddEmployeeResponse> Kết quả tạo mới và ID nhân viên
    */
   addEmployee: async (payload: AddEmployeePayload): Promise<AddEmployeeResponse> => {
-    const response = await apiClient.post<AddEmployeeResponse>('/employee', payload);
+    const response = await apiClient.post<AddEmployeeResponse>(API_ENDPOINTS.EMPLOYEE, payload);
     return response.data;
   },
 
@@ -59,7 +60,7 @@ export const employeeApi = {
    * @returns Promise<UpdateEmployeeResponse> Kết quả cập nhật và ID nhân viên
    */
   updateEmployee: async (payload: UpdateEmployeePayload): Promise<UpdateEmployeeResponse> => {
-    const response = await apiClient.put<UpdateEmployeeResponse>('/employee', payload);
+    const response = await apiClient.put<UpdateEmployeeResponse>(API_ENDPOINTS.EMPLOYEE, payload);
     return response.data;
   },
 
@@ -71,7 +72,7 @@ export const employeeApi = {
    * @returns Promise<EmployeeDetailResponse> Thông tin chi tiết nhân viên
    */
   getEmployeeDetail: async (employeeId: string | number): Promise<EmployeeDetailResponse> => {
-    const response = await apiClient.get<EmployeeDetailResponse>(`/employee/${employeeId}`);
+    const response = await apiClient.get<EmployeeDetailResponse>(`${API_ENDPOINTS.EMPLOYEE}/${employeeId}`);
     return response.data;
   },
 
@@ -83,7 +84,7 @@ export const employeeApi = {
    * @returns Promise<DeleteEmployeeResponse> Kết quả xóa nhân viên
    */
   deleteEmployee: async (employeeId: string | number): Promise<DeleteEmployeeResponse> => {
-    const response = await apiClient.delete<DeleteEmployeeResponse>(`/employee/${employeeId}`);
+    const response = await apiClient.delete<DeleteEmployeeResponse>(`${API_ENDPOINTS.EMPLOYEE}/${employeeId}`);
     return response.data;
   },
 };

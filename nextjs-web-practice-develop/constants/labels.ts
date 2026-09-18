@@ -19,6 +19,7 @@ export const LABELS = {
   // === Nhãn các trường form ===
   FIELDS: {
     EMPLOYEE_ID: 'ID',
+    ID_FULLWIDTH: 'ＩＤ',
     ACCOUNT_NAME: 'アカウント名',
     GROUP: 'グループ',
     FULL_NAME: '氏名',
@@ -32,6 +33,17 @@ export const LABELS = {
     CERTIFICATION_START_DATE: '資格交付日',
     EXPIRATION_DATE: '失効日',
     SCORE: '点数',
+  },
+
+  // === Trạng thái hiển thị ===
+  STATUS: {
+    LOADING: '読み込み中...',
+    LOGGING_OUT: 'Logging out...',
+  },
+
+  // === Định dạng / Format tham số lỗi ===
+  FORMAT: {
+    EMAIL: 'メール',
   },
 
   // === Lựa chọn dropdown ===

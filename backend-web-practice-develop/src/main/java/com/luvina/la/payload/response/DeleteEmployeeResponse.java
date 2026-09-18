@@ -7,6 +7,7 @@ package com.luvina.la.payload.response;
 
 import java.util.Collections;
 import java.util.List;
+import com.luvina.la.config.Constants;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -47,9 +48,9 @@ public class DeleteEmployeeResponse {
      */
     public static DeleteEmployeeResponse success(Long employeeId) {
         return new DeleteEmployeeResponse(
-                "200",
+                Constants.STATUS_CODE_SUCCESS,
                 employeeId,
-                new MessageDetail("MSG003", Collections.emptyList())
+                new MessageDetail(Constants.MESSAGE_CODE_DELETE_SUCCESS, Collections.emptyList())
         );
     }
 }

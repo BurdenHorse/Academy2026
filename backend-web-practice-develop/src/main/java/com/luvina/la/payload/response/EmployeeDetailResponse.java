@@ -5,7 +5,6 @@ package com.luvina.la.payload.response;
  * EmployeeDetailResponse.java, Sep 08, 2026 nvquy
  */
 
-import com.luvina.la.config.Constants;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -80,45 +79,6 @@ public class EmployeeDetailResponse {
 
         /** Điểm số chứng chỉ */
         private Integer score;
-    }
-
-    /**
-     * Tạo EmployeeDetailResponse từ EmployeeDetailDTO.
-     *
-     * @param dto DTO chứa thông tin chi tiết nhân viên từ Service
-     * @return EmployeeDetailResponse với code 200
-     */
-    public static EmployeeDetailResponse fromDTO(com.luvina.la.dto.EmployeeDetailDTO dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        List<EmployeeCertificationDetailDTO> certResponses = null;
-        if (dto.getCertifications() != null) {
-            certResponses = dto.getCertifications().stream()
-                    .map(c -> new EmployeeCertificationDetailDTO(
-                            c.getCertificationId(),
-                            c.getCertificationName(),
-                            c.getStartDate(),
-                            c.getEndDate(),
-                            c.getScore()))
-                    .collect(java.util.stream.Collectors.toList());
-        }
-
-        return new EmployeeDetailResponse(
-                Constants.STATUS_CODE_SUCCESS,
-                dto.getEmployeeId(),
-                dto.getEmployeeName(),
-                dto.getEmployeeBirthDate(),
-                dto.getDepartmentId(),
-                dto.getDepartmentName(),
-                dto.getEmployeeEmail(),
-                dto.getEmployeeTelephone(),
-                dto.getEmployeeNameKana(),
-                dto.getEmployeeLoginId(),
-                certResponses,
-                dto.getRole()
-        );
     }
 }
 

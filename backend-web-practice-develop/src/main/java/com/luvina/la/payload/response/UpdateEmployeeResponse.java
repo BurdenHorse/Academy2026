@@ -7,6 +7,8 @@ package com.luvina.la.payload.response;
 
 import java.util.Collections;
 import java.util.List;
+
+import com.luvina.la.config.Constants;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -47,9 +49,9 @@ public class UpdateEmployeeResponse {
      */
     public static UpdateEmployeeResponse success(Long employeeId) {
         return new UpdateEmployeeResponse(
-                "200",
+                Constants.STATUS_CODE_SUCCESS,
                 employeeId,
-                new MessageDetail("MSG002", Collections.emptyList())
+                new MessageDetail(Constants.MESSAGE_CODE_UPDATE_SUCCESS, Collections.emptyList())
         );
     }
 }

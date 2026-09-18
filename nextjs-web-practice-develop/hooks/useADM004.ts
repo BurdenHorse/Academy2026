@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DatePicker from 'react-datepicker';
-import { ROUTES, STORAGE_KEYS, MESSAGES, formatErrorMessage } from '@/constants';
+import { ROUTES, STORAGE_KEYS, MESSAGES, LABELS, formatErrorMessage } from '@/constants';
 import { EmployeeFormData } from '@/types/employee';
 import { employeeApi } from '@/lib/api/employee';
 import { formatDateToString, parseStringToDate, isValidCalendarDate } from '@/utils/date';
+import { REGEX_HALFSIZE_NUM } from '@/utils';
 import { validateEmployeeField, validateEmployeeForm } from '@/lib/validation';
 import { useDepartments } from './useDepartments';
 import { useCertifications } from './useCertifications';
@@ -24,7 +25,7 @@ export function useADM004() {
   // Xác định chế độ: có ID là Edit, không có ID là Add
   const isEditMode = Boolean(id);
   const trimmedId = id ? id.trim() : '';
-  const isValidId = trimmedId !== '' && /^\d+$/.test(trimmedId) && parseInt(trimmedId, 10) > 0;
+  const isValidId = trimmedId !== '' && REGEX_HALFSIZE_NUM.test(trimmedId) && parseInt(trimmedId, 10) > 0;
 
   // Tái sử dụng hooks danh mục phòng ban và chứng chỉ
   const { departments, isLoadingDepartments, departmentError } = useDepartments();
@@ -130,7 +131,7 @@ export function useADM004() {
   useEffect(() => {
     // 1. Nếu là Mode Edit nhưng ID không hợp lệ (không phải số nguyên dương) -> sang /system-error
     if (isEditMode && !isValidId) {
-      sessionStorage.setItem(STORAGE_KEYS.SYSTEM_ERROR_MESSAGE, MESSAGES.ERRORS.ER018('ＩＤ'));
+      sessionStorage.setItem(STORAGE_KEYS.SYSTEM_ERROR_MESSAGE, MESSAGES.ERRORS.ER018(LABELS.FIELDS.ID_FULLWIDTH));
       router.replace(ROUTES.SYSTEM_ERROR);
       return;
     }

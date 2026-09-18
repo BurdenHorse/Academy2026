@@ -48,9 +48,13 @@ public class EmployeeEntity implements Serializable {
     @Column(name = "employee_id", unique = true)
     private Long employeeId;
 
-    /** Phòng ban của nhân viên (FK tới departments.department_id) */
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "department_id")
+    /** ID phòng ban của nhân viên (Ghi trực tiếp vào DB, không cần query Entity) */
+    @Column(name = "department_id")
+    private Long departmentId;
+
+    /** Thông tin phòng ban liên kết (Chỉ dùng để ĐỌC dữ liệu) */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id", insertable = false, updatable = false)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private DepartmentEntity department;

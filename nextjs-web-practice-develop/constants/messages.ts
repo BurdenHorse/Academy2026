@@ -1,8 +1,16 @@
+import { ERROR_CODES } from './codes';
+
 /**
  * Định nghĩa tập trung tất cả các thông báo của ứng dụng Frontend
  * theo đúng đặc tả tài liệu ADM002 (Mục 8: Thông báo MSG001-MSG005 và Mã lỗi ER001-ER023).
  */
 export const MESSAGES = {
+  // === Thông báo form xác thực / Login validation ===
+  AUTH: {
+    USERNAME_REQUIRED: 'Username is required',
+    PASSWORD_REQUIRED: 'Password is required',
+  },
+
   // === Thông báo thành công (MSG001 - MSG004) ===
   SUCCESS: {
     /** MSG001: Đăng ký User thành công */
@@ -106,46 +114,46 @@ export function formatErrorMessage(code?: string, params: (string | number)[] = 
   const p2 = params[2] !== undefined ? params[2] : '';
 
   switch (code) {
-    case 'ER001':
+    case ERROR_CODES.ER001:
       return MESSAGES.ERRORS.ER001(p0 || 'アカウント名');
-    case 'ER002':
+    case ERROR_CODES.ER002:
       return MESSAGES.ERRORS.ER002(p0 || '項目');
-    case 'ER003':
+    case ERROR_CODES.ER003:
       return MESSAGES.ERRORS.ER003(p0 || 'アカウント名');
-    case 'ER004':
+    case ERROR_CODES.ER004:
       return MESSAGES.ERRORS.ER004(p0 || '項目');
-    case 'ER005':
+    case ERROR_CODES.ER005:
       return MESSAGES.ERRORS.ER005(p0 || '項目', String(p1 || 'メール'));
-    case 'ER006':
+    case ERROR_CODES.ER006:
       return MESSAGES.ERRORS.ER006(p0 || '項目', Number(p1) || 50);
-    case 'ER007':
+    case ERROR_CODES.ER007:
       return MESSAGES.ERRORS.ER007(p0 || '項目', Number(p1) || 8, Number(p2) || 50);
-    case 'ER008':
+    case ERROR_CODES.ER008:
       return MESSAGES.ERRORS.ER008(p0 || '項目');
-    case 'ER009':
+    case ERROR_CODES.ER009:
       return MESSAGES.ERRORS.ER009(p0 || '項目');
-    case 'ER011':
+    case ERROR_CODES.ER011:
       return MESSAGES.ERRORS.ER011(p0 || '項目');
-    case 'ER012':
+    case ERROR_CODES.ER012:
       return MESSAGES.ERRORS.ER012();
-    case 'ER013':
-    case 'ER014':
+    case ERROR_CODES.ER013:
+    case ERROR_CODES.ER014:
       return MESSAGES.ERRORS.ER013();
-    case 'ER015':
+    case ERROR_CODES.ER015:
       return MESSAGES.ERRORS.ER015();
-    case 'ER016':
+    case ERROR_CODES.ER016:
       return MESSAGES.ERRORS.LOGIN_FAILED;
-    case 'ER017':
+    case ERROR_CODES.ER017:
       return MESSAGES.ERRORS.ER017();
-    case 'ER018':
+    case ERROR_CODES.ER018:
       return MESSAGES.ERRORS.ER018(p0 || '項目');
-    case 'ER019':
+    case ERROR_CODES.ER019:
       return MESSAGES.ERRORS.ER019();
-    case 'ER020':
+    case ERROR_CODES.ER020:
       return MESSAGES.ERRORS.ER020();
-    case 'ER021':
+    case ERROR_CODES.ER021:
       return MESSAGES.ERRORS.ER021();
-    case 'ER023':
+    case ERROR_CODES.ER023:
       return MESSAGES.ERRORS.ER023();
     default:
       return MESSAGES.ERRORS.SYSTEM_ERROR;

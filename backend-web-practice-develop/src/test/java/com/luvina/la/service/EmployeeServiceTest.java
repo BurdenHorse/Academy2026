@@ -25,9 +25,9 @@ import com.luvina.la.payload.request.AddEmployeeRequest;
 import com.luvina.la.payload.request.EmployeeCertificationRequest;
 import com.luvina.la.payload.request.UpdateEmployeeRequest;
 import com.luvina.la.repository.CertificationRepository;
-import com.luvina.la.repository.DepartmentRepository;
 import com.luvina.la.repository.EmployeeCertificationRepository;
 import com.luvina.la.repository.EmployeeRepository;
+import com.luvina.la.mapper.EmployeeMapper;
 import com.luvina.la.service.impl.EmployeeServiceImpl;
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -39,6 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.TransactionStatus;
@@ -52,9 +53,6 @@ class EmployeeServiceTest {
     private EmployeeRepository employeeRepository;
 
     @Mock
-    private DepartmentRepository departmentRepository;
-
-    @Mock
     private CertificationRepository certificationRepository;
 
     @Mock
@@ -62,6 +60,9 @@ class EmployeeServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Spy
+    private EmployeeMapper employeeMapper = new EmployeeMapper();
 
     @InjectMocks
     private EmployeeServiceImpl employeeService;
@@ -95,7 +96,6 @@ class EmployeeServiceTest {
     @Test
     @DisplayName("addEmployee lưu thành công nhân viên không có chứng chỉ")
     void testAddEmployee_SuccessWithoutCertifications() {
-        when(departmentRepository.findById(1L)).thenReturn(Optional.of(department));
         when(passwordEncoder.encode("secretPass123")).thenReturn("encodedPassword");
         when(employeeRepository.save(any(EmployeeEntity.class))).thenReturn(savedEmployee);
 
@@ -122,7 +122,6 @@ class EmployeeServiceTest {
         certification.setCertificationId(3L);
         certification.setCertificationName("N3");
 
-        when(departmentRepository.findById(1L)).thenReturn(Optional.of(department));
         when(passwordEncoder.encode("secretPass123")).thenReturn("encodedPassword");
         when(employeeRepository.save(any(EmployeeEntity.class))).thenReturn(savedEmployee);
 
@@ -213,7 +212,6 @@ class EmployeeServiceTest {
         updateReq.setDepartmentId(1L);
 
         when(employeeRepository.findByEmployeeId(100L)).thenReturn(Optional.of(savedEmployee));
-        when(departmentRepository.findById(1L)).thenReturn(Optional.of(department));
         when(passwordEncoder.encode("newSecretPass456")).thenReturn("hashed_new_pass");
         when(employeeRepository.save(any(EmployeeEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -256,7 +254,6 @@ class EmployeeServiceTest {
         certEntity.setCertificationId(1L);
 
         when(employeeRepository.findByEmployeeId(100L)).thenReturn(Optional.of(savedEmployee));
-        when(departmentRepository.findById(1L)).thenReturn(Optional.of(department));
         when(certificationRepository.findById(1L)).thenReturn(Optional.of(certEntity));
         when(employeeRepository.save(any(EmployeeEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 

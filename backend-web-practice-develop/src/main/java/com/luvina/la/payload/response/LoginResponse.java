@@ -7,6 +7,7 @@ package com.luvina.la.payload.response;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.luvina.la.config.Constants;
 import lombok.Data;
 
 @Data
@@ -18,7 +19,7 @@ public class LoginResponse {
 
     public LoginResponse(String accessToken) {
         this.accessToken = accessToken;
-        this.tokenType = "Bearer";
+        this.tokenType = Constants.TOKEN_TYPE_BEARER;
     }
 
     public LoginResponse(Map<String, String> errors) {

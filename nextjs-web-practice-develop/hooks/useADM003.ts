@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ROUTES, MESSAGES, STORAGE_KEYS, formatErrorMessage, MESSAGE_CODES, ROLES, ERROR_CODES } from '@/constants';
+import { ROUTES, MESSAGES, LABELS, STORAGE_KEYS, formatErrorMessage, MESSAGE_CODES, ROLES, ERROR_CODES } from '@/constants';
 import { employeeApi } from '@/lib/api/employee';
 import { EmployeeDetailResponse } from '@/types/employee';
+import { REGEX_HALFSIZE_NUM } from '@/utils';
 
 /**
  * Custom hook quản lý dữ liệu và hành động cho màn hình xem chi tiết nhân viên (ADM003).
@@ -21,8 +22,8 @@ export function useADM003() {
   // Validate ID và fetch dữ liệu chi tiết nhân viên trực tiếp từ ID trên URL
   useEffect(() => {
     // 1. Kiểm tra ID: nếu thiếu hoặc không phải là số nguyên dương -> chuyển sang /system-error
-    if (!id || !/^\d+$/.test(id.trim()) || parseInt(id.trim(), 10) <= 0) {
-      sessionStorage.setItem(STORAGE_KEYS.SYSTEM_ERROR_MESSAGE, MESSAGES.ERRORS.ER018('ＩＤ'));
+    if (!id || !REGEX_HALFSIZE_NUM.test(id.trim()) || parseInt(id.trim(), 10) <= 0) {
+      sessionStorage.setItem(STORAGE_KEYS.SYSTEM_ERROR_MESSAGE, MESSAGES.ERRORS.ER018(LABELS.FIELDS.ID_FULLWIDTH));
       router.replace(ROUTES.SYSTEM_ERROR);
       return;
     }

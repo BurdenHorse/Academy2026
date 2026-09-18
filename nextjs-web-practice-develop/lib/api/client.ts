@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { STORAGE_KEYS, ROUTES } from '@/constants';
 
 /** Địa chỉ base URL của API server lấy từ biến môi trường hoặc mặc định localhost:8085 */
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8085';
@@ -21,7 +22,7 @@ const apiClient = axios.create({
 export function setupInterceptors(client: ReturnType<typeof axios.create>): void {
   client.interceptors.request.use(
     (config) => {
-      const token = sessionStorage.getItem('access_token');
+      const token = sessionStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
       if (token) {
         if (config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
@@ -38,10 +39,10 @@ export function setupInterceptors(client: ReturnType<typeof axios.create>): void
     (response) => response,
     (error) => {
       if (error.response?.status === 401) {
-        sessionStorage.removeItem('access_token');
-        sessionStorage.removeItem('token_type');
+        sessionStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+        sessionStorage.removeItem(STORAGE_KEYS.TOKEN_TYPE);
         if (typeof window !== 'undefined') {
-          window.location.href = '/login';
+          window.location.href = ROUTES.LOGIN;
         }
       }
       return Promise.reject(error);

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { departmentApi } from '@/lib/api/department';
 import { DepartmentDTO } from '@/types/department';
-import { MESSAGES } from '@/constants';
+import { MESSAGES, RESPONSE_CODES } from '@/constants';
 
 /**
  * Custom hook quản lý việc lấy danh sách và state của phòng ban (Departments).
@@ -21,7 +21,7 @@ export function useDepartments() {
     setDepartmentError(null);
     try {
       const res = await departmentApi.getDepartments();
-      if (res.code === "200") {
+      if (res.code === RESPONSE_CODES.SUCCESS) {
         setDepartments(res.departments || []);
       } else {
         setDepartmentError(MESSAGES.ADM002.FETCH_DEPARTMENTS_ERROR);

@@ -1,3 +1,5 @@
+import { STORAGE_KEYS } from '@/constants';
+
 /**
  * Lưu trữ Access Token và Token Type vào sessionStorage của trình duyệt.
  *
@@ -5,8 +7,8 @@
  * @param tokenType Loại token (thường là 'Bearer')
  */
 export function storeToken(token: string, tokenType: string): void {
-  sessionStorage.setItem('access_token', token);
-  sessionStorage.setItem('token_type', tokenType);
+  sessionStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
+  sessionStorage.setItem(STORAGE_KEYS.TOKEN_TYPE, tokenType);
 }
 
 /**
@@ -15,8 +17,8 @@ export function storeToken(token: string, tokenType: string): void {
  * @returns Object chứa accessToken và tokenType, hoặc null nếu chưa đăng nhập
  */
 export function getToken(): { accessToken: string; tokenType: string } | null {
-  const accessToken = sessionStorage.getItem('access_token');
-  const tokenType = sessionStorage.getItem('token_type');
+  const accessToken = sessionStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+  const tokenType = sessionStorage.getItem(STORAGE_KEYS.TOKEN_TYPE);
 
   if (accessToken && tokenType) {
     return { accessToken, tokenType };
@@ -28,8 +30,8 @@ export function getToken(): { accessToken: string; tokenType: string } | null {
  * Xóa thông tin Token khỏi sessionStorage khi người dùng đăng xuất hoặc hết hạn phiên làm việc.
  */
 export function removeToken(): void {
-  sessionStorage.removeItem('access_token');
-  sessionStorage.removeItem('token_type');
+  sessionStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+  sessionStorage.removeItem(STORAGE_KEYS.TOKEN_TYPE);
 }
 
 /**

@@ -5,8 +5,8 @@ package com.luvina.la.controller;
  * CertificationController.java, Aug 26, 2026 nvquy
  */
 
-import com.luvina.la.config.Constants;
 import com.luvina.la.dto.CertificationDTO;
+import com.luvina.la.mapper.CertificationMapper;
 import com.luvina.la.payload.response.ListCertificationResponse;
 import com.luvina.la.service.CertificationService;
 import java.util.List;
@@ -26,9 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class CertificationController {
 
     private final CertificationService certificationService;
+    private final CertificationMapper certificationMapper;
 
-    public CertificationController(CertificationService certificationService) {
+    public CertificationController(CertificationService certificationService, CertificationMapper certificationMapper) {
         this.certificationService = certificationService;
+        this.certificationMapper = certificationMapper;
     }
 
     /**
@@ -40,9 +42,6 @@ public class CertificationController {
     @GetMapping
     public ListCertificationResponse getCertifications() {
         List<CertificationDTO> certifications = certificationService.getAllCertifications();
-        ListCertificationResponse response = new ListCertificationResponse();
-        response.setCode(Constants.STATUS_CODE_SUCCESS);
-        response.setCertifications(certifications);
-        return response;
+        return certificationMapper.toListResponse(certifications);
     }
 }

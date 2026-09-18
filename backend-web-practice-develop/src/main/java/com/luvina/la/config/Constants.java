@@ -157,9 +157,54 @@ public class Constants {
     /** Giá trị mặc định cho limit (số bản ghi mỗi trang) */
     public static final int DEFAULT_LIMIT = 5;
 
+    // === Token Types & Prefixes ===
+    /** Loại token Bearer */
+    public static final String TOKEN_TYPE_BEARER = "Bearer";
+
+    /** Tiền tố trong Authorization Header */
+    public static final String TOKEN_HEADER_PREFIX = "Bearer ";
+
     // === Validation Constraints ===
     /** Độ dài tối đa cho tên nhân viên tìm kiếm */
     public static final int MAX_LENGTH_EMPLOYEE_NAME = 125;
+
+    /** Độ dài tối đa cho tên đăng nhập */
+    public static final int MAX_LENGTH_ACCOUNT_NAME = 50;
+
+    /** Độ dài tối đa cho tên Katakana */
+    public static final int MAX_LENGTH_FULL_NAME_KANA = 125;
+
+    /** Độ dài tối đa cho email */
+    public static final int MAX_LENGTH_EMAIL = 125;
+
+    /** Độ dài tối đa cho số điện thoại */
+    public static final int MAX_LENGTH_TELEPHONE = 50;
+
+    /** Độ dài tối thiểu cho mật khẩu */
+    public static final int MIN_LENGTH_PASSWORD = 8;
+
+    /** Độ dài tối đa cho mật khẩu */
+    public static final int MAX_LENGTH_PASSWORD = 50;
+
+    // === Sort Parameter Names ===
+    /** Tên tham số sắp xếp theo tên nhân viên */
+    public static final String PARAM_ORD_EMPLOYEE_NAME = "ord_employee_name";
+
+    /** Tên tham số sắp xếp theo tên chứng chỉ */
+    public static final String PARAM_ORD_CERTIFICATION_NAME = "ord_certification_name";
+
+    /** Tên tham số sắp xếp theo ngày hết hạn chứng chỉ */
+    public static final String PARAM_ORD_END_DATE = "ord_end_date";
+
+    /** Tên tham số danh sách ưu tiên sắp xếp */
+    public static final String PARAM_SORT_PRIORITY = "sort_priority";
+
+    // === SQL & Format Constants ===
+    /** Định dạng ngày tháng trong câu truy vấn Native SQL của MySQL */
+    public static final String SQL_DATE_FORMAT = "%Y/%m/%d";
+
+    /** Ký tự phân cách dấu phẩy mặc định */
+    public static final String DELIMITER_COMMA = ",";
 
     // === Sort Valid Values ===
     /** Giá trị sort tăng dần */

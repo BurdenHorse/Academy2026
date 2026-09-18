@@ -12,6 +12,7 @@ import com.luvina.la.dto.EmployeeDetailDTO;
 import com.luvina.la.dto.EmployeeSearchResultDTO;
 import com.luvina.la.dto.UpdateEmployeeDTO;
 import com.luvina.la.entity.EmployeeEntity;
+import com.luvina.la.mapper.EmployeeMapper;
 import com.luvina.la.payload.request.AddEmployeeRequest;
 import com.luvina.la.payload.request.UpdateEmployeeRequest;
 import com.luvina.la.payload.response.AddEmployeeResponse;
@@ -37,16 +38,21 @@ public class EmployeeController {
 
     private final EmployeeService employeeService;
     private final EmployeeValidator employeeValidator;
+    private final EmployeeMapper employeeMapper;
 
     /**
-     * Constructor injection cho EmployeeService và EmployeeValidator.
+     * Constructor injection cho EmployeeService, EmployeeValidator và EmployeeMapper.
      *
      * @param employeeService Service xử lý nghiệp vụ nhân viên
      * @param employeeValidator Validator kiểm tra tính hợp lệ dữ liệu
+     * @param employeeMapper Mapper chuyển đổi dữ liệu response
      */
-    public EmployeeController(EmployeeService employeeService, EmployeeValidator employeeValidator) {
+    public EmployeeController(EmployeeService employeeService,
+                              EmployeeValidator employeeValidator,
+                              EmployeeMapper employeeMapper) {
         this.employeeService = employeeService;
         this.employeeValidator = employeeValidator;
+        this.employeeMapper = employeeMapper;
     }
 
     /**
@@ -87,9 +93,9 @@ public class EmployeeController {
             @RequestParam(name = "limit", required = false) String limit) {
 
         // Validate tham số sort — nếu có giá trị mà khác ASC/DESC → lỗi ER021
-        employeeValidator.validateSortParam(ordEmployeeName, "ord_employee_name");
-        employeeValidator.validateSortParam(ordCertificationName, "ord_certification_name");
-        employeeValidator.validateSortParam(ordEndDate, "ord_end_date");
+        employeeValidator.validateSortParam(ordEmployeeName, Constants.PARAM_ORD_EMPLOYEE_NAME);
+        employeeValidator.validateSortParam(ordCertificationName, Constants.PARAM_ORD_CERTIFICATION_NAME);
+        employeeValidator.validateSortParam(ordEndDate, Constants.PARAM_ORD_END_DATE);
 
         // Parse và validate offset — phải là số nguyên dương, mặc định 0
         int parsedOffset = employeeValidator.parsePositiveIntParam(offset, Constants.DEFAULT_OFFSET, Constants.PARAM_NAME_OFFSET);
@@ -103,22 +109,16 @@ public class EmployeeController {
         // Xử lý employeeName: trim và kiểm tra rỗng
         String trimmedName = StringUtil.trimToNull(employeeName);
 
-        // Validate độ dài tối đa 125 ký tự theo đặc tả ADM002 (mã lỗi ER006)
-        employeeValidator.validateSearchEmployeeName(trimmedName);
-
         EmployeeSearchResultDTO resultDTO = employeeService.getEmployeeList(
                 trimmedName, parsedDepartmentId,
                 StringUtil.normalizeSort(ordEmployeeName),
                 StringUtil.normalizeSort(ordCertificationName),
                 StringUtil.normalizeSort(ordEndDate),
                 sortPriority,
-                parsedOffset, parsedLimit);
+                parsedOffset,
+                parsedLimit);
 
-        ListEmployeeResponse response = new ListEmployeeResponse();
-        response.setCode(Constants.STATUS_CODE_SUCCESS);
-        response.setTotalRecords(resultDTO.getTotalRecords());
-        response.setEmployees(resultDTO.getEmployees());
-        return response;
+        return employeeMapper.toListResponse(resultDTO);
     }
 
     /**
@@ -162,7 +162,7 @@ public class EmployeeController {
     public EmployeeDetailResponse getEmployeeDetail(@PathVariable("id") String id) {
         Long employeeId = employeeValidator.validateAndParseId(id);
         EmployeeDetailDTO employeeDetailDTO = employeeService.getEmployeeDetail(employeeId);
-        return EmployeeDetailResponse.fromDTO(employeeDetailDTO);
+        return employeeMapper.toDetailResponse(employeeDetailDTO);
     }
 
     /**

@@ -1,14 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
 import { employeeApi } from '@/lib/api/employee';
 import { EmployeeListDTO, EmployeeSearchParams } from '@/types/employee';
-import { DEFAULT_PAGE_LIMIT, MESSAGES, RESPONSE_CODES } from '@/constants';
+import {
+  DEFAULT_PAGE_LIMIT,
+  MESSAGES,
+  RESPONSE_CODES,
+  STORAGE_KEYS,
+  SORT_DIRECTIONS,
+  SORT_FIELDS,
+  SORT_ICONS,
+  DEFAULT_SORT_PRIORITY,
+  SortField,
+} from '@/constants';
 import { truncateText, formatScore } from '@/utils';
 import { useDepartments } from './useDepartments';
 
 export { truncateText, formatScore };
-
-const STORAGE_KEY_PARAMS = 'ADM002_SEARCH_PARAMS';
-const STORAGE_KEY_INPUT = 'ADM002_SEARCH_INPUT';
 
 /**
  * Custom hook quản lý toàn bộ state và logic nghiệp vụ của màn hình danh sách nhân viên (ADM002).
@@ -35,7 +42,7 @@ export function useADM002() {
   // Khôi phục searchParams từ sessionStorage nếu có, luôn đồng bộ limit theo DEFAULT_PAGE_LIMIT mới nhất
   const [searchParams, setSearchParams] = useState<EmployeeSearchParams>(() => {
     if (typeof window !== 'undefined') {
-      const saved = sessionStorage.getItem(STORAGE_KEY_PARAMS);
+      const saved = sessionStorage.getItem(STORAGE_KEYS.SEARCH_PARAMS);
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
@@ -51,10 +58,10 @@ export function useADM002() {
     return {
       employee_name: '',
       department_id: '',
-      ord_employee_name: 'ASC',
+      ord_employee_name: SORT_DIRECTIONS.ASC,
       ord_certification_name: '',
       ord_end_date: '',
-      sort_priority: 'ord_employee_name,ord_certification_name,ord_end_date',
+      sort_priority: DEFAULT_SORT_PRIORITY,
       offset: 0,
       limit: DEFAULT_PAGE_LIMIT,
     };
@@ -63,7 +70,7 @@ export function useADM002() {
   // State lưu trữ dữ liệu người dùng nhập trên form tìm kiếm trước khi bấm Search
   const [searchInput, setSearchInput] = useState<{ employee_name: string; department_id: string }>(() => {
     if (typeof window !== 'undefined') {
-      const saved = sessionStorage.getItem(STORAGE_KEY_INPUT);
+      const saved = sessionStorage.getItem(STORAGE_KEYS.SEARCH_INPUT);
       if (saved) {
         try {
           return JSON.parse(saved);
@@ -81,8 +88,8 @@ export function useADM002() {
   // Lưu searchParams & searchInput vào sessionStorage mỗi khi thay đổi
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      sessionStorage.setItem(STORAGE_KEY_PARAMS, JSON.stringify(searchParams));
-      sessionStorage.setItem(STORAGE_KEY_INPUT, JSON.stringify(searchInput));
+      sessionStorage.setItem(STORAGE_KEYS.SEARCH_PARAMS, JSON.stringify(searchParams));
+      sessionStorage.setItem(STORAGE_KEYS.SEARCH_INPUT, JSON.stringify(searchInput));
     }
   }, [searchParams, searchInput]);
 
@@ -146,13 +153,13 @@ export function useADM002() {
   /**
    * Trả về biểu tượng icon sort cho một cột cụ thể (▲▽ khi ASC, ▼△ khi DESC).
    *
-   * @param field Tên trường sort ('ord_employee_name' | 'ord_certification_name' | 'ord_end_date')
+   * @param field Tên trường sort
    * @returns Chuỗi ký tự biểu diễn icon mũi tên ('▲▽' hoặc '▼△')
    */
-  const getSortIcon = (field: 'ord_employee_name' | 'ord_certification_name' | 'ord_end_date') => {
+  const getSortIcon = (field: SortField) => {
     const currentSort = searchParams[field];
-    if (currentSort === 'DESC') return '▼△';
-    return '▲▽';
+    if (currentSort === SORT_DIRECTIONS.DESC) return SORT_ICONS.DESC;
+    return SORT_ICONS.ASC;
   };
 
   /**
@@ -161,20 +168,23 @@ export function useADM002() {
    *
    * @param field Tên trường sort được click
    */
-  const handleSort = (field: 'ord_employee_name' | 'ord_certification_name' | 'ord_end_date') => {
+  const handleSort = (field: SortField) => {
     setSearchParams(prev => {
       const newParams = { ...prev, offset: 0 };
-      const currentVal = prev[field] || 'ASC';
+      const currentVal = prev[field] || SORT_DIRECTIONS.ASC;
 
       // Toggle ngay lập tức: nếu đang ASC -> sang DESC, nếu đang DESC -> sang ASC
-      newParams[field] = currentVal === 'ASC' ? 'DESC' : 'ASC';
+      newParams[field] = currentVal === SORT_DIRECTIONS.ASC ? SORT_DIRECTIONS.DESC : SORT_DIRECTIONS.ASC;
 
       // Đảm bảo các cột khác có giá trị mặc định ASC nếu chưa set
-      const allSortFields: Array<'ord_employee_name' | 'ord_certification_name' | 'ord_end_date'> = 
-        ['ord_employee_name', 'ord_certification_name', 'ord_end_date'];
+      const allSortFields: SortField[] = [
+        SORT_FIELDS.EMPLOYEE_NAME,
+        SORT_FIELDS.CERTIFICATION_NAME,
+        SORT_FIELDS.END_DATE,
+      ];
       allSortFields.forEach(f => {
         if (f !== field && !newParams[f]) {
-          newParams[f] = 'ASC';
+          newParams[f] = SORT_DIRECTIONS.ASC;
         }
       });
 

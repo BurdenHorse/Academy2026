@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useADM002 } from '@/hooks/useADM002';
-import { ROUTES, MESSAGES, LABELS, STORAGE_KEYS } from '@/constants';
+import { ROUTES, MESSAGES, LABELS, STORAGE_KEYS, SORT_FIELDS, VALIDATION_LIMITS } from '@/constants';
 
 /**
  * Component hiển thị toàn bộ giao diện màn hình Danh sách nhân viên (ADM002).
@@ -37,7 +37,7 @@ export default function ADM002() {
     if (totalPages <= 1) return null;
 
     return (
-      <div className="pagin mt-3 d-flex justify-content-center w-100 col-12">
+      <div className="pagin d-flex justify-content-center">
         {/* Nút lùi: disabled khi ở trang đầu */}
         <button
           className={`btn btn-sm btn-pre btn-falcon-default ${currentPage === 1 ? 'btn-disabled' : ''}`}
@@ -134,7 +134,7 @@ export default function ADM002() {
               <div className="col-sm">
                 <input
                   type="text"
-                  maxLength={125}
+                  maxLength={VALIDATION_LIMITS.MAX_FULL_NAME}
                   value={searchInput.employee_name}
                   onChange={(e) =>
                     setSearchInput({ ...searchInput, employee_name: e.target.value })
@@ -197,8 +197,11 @@ export default function ADM002() {
           <div className="css-grid-table box-shadow w-100">
             <div className="css-grid-table-header">
               <div>{LABELS.FIELDS.EMPLOYEE_ID}</div>
-              <div style={{ cursor: 'pointer' }} onClick={() => handleSort('ord_employee_name')}>
-                {LABELS.FIELDS.FULL_NAME} {getSortIcon('ord_employee_name')}
+              <div
+                style={{ cursor: 'pointer' }}
+                onClick={() => handleSort(SORT_FIELDS.EMPLOYEE_NAME)}
+              >
+                {LABELS.FIELDS.FULL_NAME} {getSortIcon(SORT_FIELDS.EMPLOYEE_NAME)}
               </div>
               <div>{LABELS.FIELDS.BIRTH_DATE}</div>
               <div>{LABELS.FIELDS.GROUP}</div>
@@ -206,12 +209,15 @@ export default function ADM002() {
               <div>{LABELS.FIELDS.TELEPHONE}</div>
               <div
                 style={{ cursor: 'pointer' }}
-                onClick={() => handleSort('ord_certification_name')}
+                onClick={() => handleSort(SORT_FIELDS.CERTIFICATION_NAME)}
               >
-                {LABELS.TITLES.JAPANESE_SKILL} {getSortIcon('ord_certification_name')}
+                {LABELS.TITLES.JAPANESE_SKILL} {getSortIcon(SORT_FIELDS.CERTIFICATION_NAME)}
               </div>
-              <div style={{ cursor: 'pointer' }} onClick={() => handleSort('ord_end_date')}>
-                {LABELS.FIELDS.EXPIRATION_DATE} {getSortIcon('ord_end_date')}
+              <div
+                style={{ cursor: 'pointer' }}
+                onClick={() => handleSort(SORT_FIELDS.END_DATE)}
+              >
+                {LABELS.FIELDS.EXPIRATION_DATE} {getSortIcon(SORT_FIELDS.END_DATE)}
               </div>
               <div className="text-center">{LABELS.FIELDS.SCORE}</div>
             </div>
@@ -224,24 +230,30 @@ export default function ADM002() {
                       {emp.employeeId}
                     </Link>
                   </div>
-                  <div title={emp.employeeName}>{truncateText(emp.employeeName, 22)}</div>
+                  <div title={emp.employeeName}>
+                    {truncateText(emp.employeeName, VALIDATION_LIMITS.TRUNCATE_TABLE_TEXT)}
+                  </div>
                   <div>{emp.employeeBirthDate || ''}</div>
-                  <div title={emp.departmentName}>{truncateText(emp.departmentName, 22)}</div>
-                  <div title={emp.employeeEmail}>{truncateText(emp.employeeEmail, 22)}</div>
-                  <div>{truncateText(emp.employeeTelephone, 22)}</div>
+                  <div title={emp.departmentName}>
+                    {truncateText(emp.departmentName, VALIDATION_LIMITS.TRUNCATE_TABLE_TEXT)}
+                  </div>
+                  <div title={emp.employeeEmail}>
+                    {truncateText(emp.employeeEmail, VALIDATION_LIMITS.TRUNCATE_TABLE_TEXT)}
+                  </div>
+                  <div>{truncateText(emp.employeeTelephone, VALIDATION_LIMITS.TRUNCATE_TABLE_TEXT)}</div>
                   <div title={emp.certificationName || ''}>
-                    {truncateText(emp.certificationName, 22)}
+                    {truncateText(emp.certificationName, VALIDATION_LIMITS.TRUNCATE_TABLE_TEXT)}
                   </div>
                   <div>{emp.endDate || ''}</div>
                   <div className="text-center col-score">{formatScore(emp.score)}</div>
                 </React.Fragment>
               ))}
             </div>
+
+            {/* ===== Phần phân trang (Pagination) ===== */}
+            {renderPagination()}
           </div>
         )}
-
-        {/* ===== Phần phân trang (Pagination) ===== */}
-        {!isLoading && employees.length > 0 && renderPagination()}
       </div>
     </>
   );

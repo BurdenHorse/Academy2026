@@ -5,8 +5,8 @@ package com.luvina.la.controller;
  * DepartmentController.java, Aug 21, 2026 nvquy
  */
 
-import com.luvina.la.config.Constants;
 import com.luvina.la.dto.DepartmentDTO;
+import com.luvina.la.mapper.DepartmentMapper;
 import com.luvina.la.payload.response.ListDepartmentResponse;
 import com.luvina.la.service.DepartmentService;
 import java.util.List;
@@ -26,14 +26,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class DepartmentController {
 
     private final DepartmentService departmentService;
+    private final DepartmentMapper departmentMapper;
 
     /**
-     * Constructor injection cho DepartmentService.
+     * Constructor injection cho DepartmentService và DepartmentMapper.
      *
      * @param departmentService Service xử lý nghiệp vụ phòng ban
+     * @param departmentMapper  Mapper chuyển đổi dữ liệu phòng ban
      */
-    public DepartmentController(DepartmentService departmentService) {
+    public DepartmentController(DepartmentService departmentService, DepartmentMapper departmentMapper) {
         this.departmentService = departmentService;
+        this.departmentMapper = departmentMapper;
     }
 
     /**
@@ -46,9 +49,6 @@ public class DepartmentController {
     @GetMapping
     public ListDepartmentResponse getDepartments() {
         List<DepartmentDTO> departments = departmentService.getAllDepartments();
-        ListDepartmentResponse response = new ListDepartmentResponse();
-        response.setCode(Constants.STATUS_CODE_SUCCESS);
-        response.setDepartments(departments);
-        return response;
+        return departmentMapper.toListResponse(departments);
     }
 }
